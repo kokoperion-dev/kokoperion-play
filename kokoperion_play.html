@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ココペリオン - 第1ステージ</title>
+  <style>
+    body { margin:0;padding:0; background:#000; font-family:sans-serif; }
+    #game-area { position:relative; width:100vw; height:100vh; overflow:hidden; }
+    #kokopelli { position:absolute; top:10%; left:45%; width:60px; }
+    #raccoon { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); width:80px; }
+    .star { position:absolute; width:40px; transition:top 2s linear; }
+    #message { position:absolute; top:30%; width:100%; text-align:center; font-size:24px; color:white; display:none; }
+    #indian { width:150px; margin-top:20px; }
+  </style>
+</head>
+<body>
+  <div id="game-area">
+    <img id="kokopelli" src="画像のURLをここに入れてください" />
+    <img id="raccoon" src="画像のURLをここに入れてください" />
+    <div id="message"></div>
+  </div>
+
+  <audio id="sound-pop" src="音ポクポクのURL" preload="auto"></audio>
+  <audio id="sound-catch" src="音シャリーンのURL" preload="auto"></audio>
+  <audio id="bgm-clear" src="クリア時BGMのURL" preload="auto"></audio>
+  <audio id="bgm-fail" src="失敗時BGMのURL" preload="auto"></audio>
+
+  <script>
+    const gameArea = document.getElementById('game-area');
+    const raccoon = document.getElementById('raccoon');
+    const message = document.getElementById('message');
+    const popSound = document.getElementById('sound-pop');
+    const catchSound = document.getElementById('sound-catch');
+    const bgmClear = document.getElementById('bgm-clear');
+    const bgmFail = document.getElementById('bgm-fail');
+    let caught=0, total=0, playing=true;
+
+    function dropStar(){
+      if(!playing||total>=15)return;
+      const star=document.createElement('img');
+      // 以下のURLをあなたの星の画像URLに置き換えてください
+      star.src='星画像URL';
+      star.className='star';
+      star.style.left=Math.random()*(window.innerWidth-40)+'px';
+      star.style.top='0px';
+      gameArea.appendChild(star);
+      popSound.play();
+      setTimeout(()=>{
+        const sr=star.getBoundingClientRect(), rr=raccoon.getBoundingClientRect();
+        if(sr.bottom>=rr.top&&sr.left<rr.right&&sr.right>rr.left){
+          caught++;
+          catchSound.play();
+        }
+        star.remove();
+      },2000);
+      total++;
+      if(total<15) setTimeout(dropStar,2000);
+    }
+
+    function endGame(){
+      playing=false;
+      message.style.display='block';
+      if(caught>=10){
+        bgmClear.play();
+        // 以下のURLをあなたのインディアン画像URLに置き換えてください
+        message.innerHTML='<img id="indian" src="インディアン画像のURL" /><br>子は親の背を見て育つ';
+      } else {
+        bgmFail.play();
+        message.innerHTML='またチャレンジしてみよう';
+      }
+    }
+
+    function startGame(){
+      dropStar();
+      setTimeout(endGame,30000);
+    }
+
+    let startX=null;
+    window.addEventListener('touchstart',e=>{ startX=e.touches[0].clientX; });
+    window.addEventListener('touchmove',e=>{
+      if(startX===null)return;
+      const deltaX=e.touches[0].clientX-startX;
+      let newLeft=raccoon.offsetLeft+deltaX;
+      raccoon.style.left=Math.min(Math.max(0,newLeft),window.innerWidth-80)+'px';
+      startX=e.touches[0].clientX;
+    });
+    window.onload=startGame;
+  </script>
+</body>
+</html>
