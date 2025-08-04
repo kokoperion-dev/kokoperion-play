@@ -16,7 +16,7 @@
       position: relative;
       width: 100vw;
       height: 100vh;
-      background-image: url('background.png');
+      background-image: url('background.PNG'); /* ファイル名を修正 */
       background-size: cover;
       background-position: center;
     }
@@ -29,7 +29,7 @@
     }
     #raccoon {
       position: absolute;
-      bottom: 10px;
+      bottom: 100px; /* アライグマの位置を100pxに修正 */
       left: 50%;
       transform: translateX(-50%);
       width: 120px;
@@ -127,9 +127,7 @@
 </head>
 <body>
   <div id="game-area">
-    <img id="kokopelli" src="ココペリ.PNG" />
-    <img id="raccoon" src="アライグマ.PNG" />
-    <div id="stage-display">ステージ: <span id="stage-num">1</span></div>
+    <img id="kokopelli" src="kokopelli.JPG" /> <img id="raccoon" src="raccoon.PNG" /> <div id="stage-display">ステージ: <span id="stage-num">1</span></div>
     <div id="score-display">スコア: <span id="score">0</span></div>
     <div id="timer-display">残り時間: <span id="timer">30</span>秒</div>
   </div>
@@ -140,12 +138,12 @@
     <button id="retry-button" style="display: none;">再チャレンジ</button>
   </div>
 
-  <audio id="sound-pop" src="普通の星が出る時の音.mp3" preload="auto"></audio>
-  <audio id="sound-pop-rainbow" src="虹色の星が出た時の音.mp3" preload="auto"></audio>
-  <audio id="sound-catch" src="普通の星をキャッチした音.mp3" preload="auto"></audio>
-  <audio id="sound-catch-rainbow" src="虹色の星をキャッチした音.mp3" preload="auto"></audio>
+  <audio id="sound-pop" src="star_pop.mp3" preload="auto"></audio>
+  <audio id="sound-pop-rainbow" src="star_pop_rainbow.mp3" preload="auto"></audio>
+  <audio id="sound-catch" src="star_catch.mp3" preload="auto"></audio>
+  <audio id="sound-catch-rainbow" src="star_catch_rainbow.mp3" preload="auto"></audio>
   <audio id="bgm-clear" src="clear_bgm.mp3" preload="auto"></audio>
-  <audio id="bgm-fail" src="クリア失敗時.mp3" preload="auto"></audio>
+  <audio id="bgm-fail" src="fail_bgm.mp3" preload="auto"></audio>
 
   <script>
     const gameArea = document.getElementById('game-area');
@@ -230,11 +228,11 @@
       const star = document.createElement('img');
       let isRainbow = false;
       if (currentStage === 3 && Math.random() < stageConfig.rainbowStarChance) {
-        star.src = '星レインボー.PNG';
+        star.src = 'star_rainbow.PNG'; /* ファイル名を修正 */
         star.className = 'star rainbow';
         isRainbow = true;
       } else {
-        star.src = '星ノーマル.PNG';
+        star.src = 'star_normal.PNG'; /* ファイル名を修正 */
         star.className = 'star';
       }
 
