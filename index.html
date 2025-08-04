@@ -1,92 +1,369 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ココペリオン - 第1ステージ</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ココペリオン</title>
   <style>
-    body { margin:0;padding:0; background:#000; font-family:sans-serif; }
-    #game-area { position:relative; width:100vw; height:100vh; overflow:hidden; }
-    #kokopelli { position:absolute; top:10%; left:45%; width:60px; }
-    #raccoon { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); width:80px; }
-    .star { position:absolute; width:40px; transition:top 2s linear; }
-    #message { position:absolute; top:30%; width:100%; text-align:center; font-size:24px; color:white; display:none; }
-    #indian { width:150px; margin-top:20px; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      font-family: 'serif', sans-serif;
+      overflow: hidden;
+    }
+    #game-area {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background-image: url('background.png');
+      background-size: cover;
+      background-position: center;
+    }
+    #kokopelli {
+      position: absolute;
+      top: 10%;
+      left: 10%;
+      width: 100px;
+      z-index: 10;
+    }
+    #raccoon {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      z-index: 10;
+    }
+    .star {
+      position: absolute;
+      width: 40px;
+      animation-name: drop, sway;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    .star.rainbow {
+      width: 50px;
+    }
+    .star.visible {
+      opacity: 1;
+    }
+    @keyframes drop {
+      from { top: 0; }
+      to { top: 100%; }
+    }
+    @keyframes sway {
+      0% { transform: translateX(0); }
+      50% { transform: translateX(10px); }
+      100% { transform: translateX(0); }
+    }
+    #message-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      display: none;
+    }
+    #message-overlay h2 {
+      font-size: 36px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    #message-overlay p {
+      font-size: 24px;
+      margin: 10px 0;
+      line-height: 1.5;
+    }
+    #message-overlay img {
+      width: 150px;
+      margin-top: 20px;
+    }
+    #message-overlay button {
+      padding: 15px 30px;
+      margin-top: 30px;
+      font-size: 20px;
+      cursor: pointer;
+      border: none;
+      background-color: #e59a4b;
+      color: white;
+      border-radius: 5px;
+    }
+    #score-display {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      font-size: 24px;
+      z-index: 50;
+    }
+    #timer-display {
+      position: absolute;
+      top: 20px;
+      right: 200px;
+      color: white;
+      font-size: 24px;
+      z-index: 50;
+    }
+    #stage-display {
+      position: absolute;
+      top: 20px;
+      right: 400px;
+      color: white;
+      font-size: 24px;
+      z-index: 50;
+    }
   </style>
 </head>
 <body>
   <div id="game-area">
-    <img id="kokopelli" src="画像のURLをここに入れてください" />
-    <img id="raccoon" src="画像のURLをここに入れてください" />
-    <div id="message"></div>
+    <img id="kokopelli" src="ココペリ.PNG" />
+    <img id="raccoon" src="アライグマ.PNG" />
+    <div id="stage-display">ステージ: <span id="stage-num">1</span></div>
+    <div id="score-display">スコア: <span id="score">0</span></div>
+    <div id="timer-display">残り時間: <span id="timer">30</span>秒</div>
   </div>
 
-  <audio id="sound-pop" src="音ポクポクのURL" preload="auto"></audio>
-  <audio id="sound-catch" src="音シャリーンのURL" preload="auto"></audio>
-  <audio id="bgm-clear" src="クリア時BGMのURL" preload="auto"></audio>
-  <audio id="bgm-fail" src="失敗時BGMのURL" preload="auto"></audio>
+  <div id="message-overlay">
+    <div id="message-content"></div>
+    <button id="next-button" style="display: none;">次のステージへ</button>
+    <button id="retry-button" style="display: none;">再チャレンジ</button>
+  </div>
+
+  <audio id="sound-pop" src="普通の星が出る時の音.mp3" preload="auto"></audio>
+  <audio id="sound-pop-rainbow" src="虹色の星が出た時の音.mp3" preload="auto"></audio>
+  <audio id="sound-catch" src="普通の星をキャッチした音.mp3" preload="auto"></audio>
+  <audio id="sound-catch-rainbow" src="虹色の星をキャッチした音.mp3" preload="auto"></audio>
+  <audio id="bgm-clear" src="clear_bgm.mp3" preload="auto"></audio>
+  <audio id="bgm-fail" src="クリア失敗時.mp3" preload="auto"></audio>
 
   <script>
     const gameArea = document.getElementById('game-area');
     const raccoon = document.getElementById('raccoon');
-    const message = document.getElementById('message');
+    const scoreDisplay = document.getElementById('score');
+    const timerDisplay = document.getElementById('timer');
+    const stageDisplay = document.getElementById('stage-num');
+    const messageOverlay = document.getElementById('message-overlay');
+    const messageContent = document.getElementById('message-content');
+    const nextButton = document.getElementById('next-button');
+    const retryButton = document.getElementById('retry-button');
+
     const popSound = document.getElementById('sound-pop');
+    const popSoundRainbow = document.getElementById('sound-pop-rainbow');
     const catchSound = document.getElementById('sound-catch');
+    const catchSoundRainbow = document.getElementById('sound-catch-rainbow');
     const bgmClear = document.getElementById('bgm-clear');
     const bgmFail = document.getElementById('bgm-fail');
-    let caught=0, total=0, playing=true;
 
-    function dropStar(){
-      if(!playing||total>=15)return;
-      const star=document.createElement('img');
-      // 以下のURLをあなたの星の画像URLに置き換えてください
-      star.src='星画像URL';
-      star.className='star';
-      star.style.left=Math.random()*(window.innerWidth-40)+'px';
-      star.style.top='0px';
-      gameArea.appendChild(star);
-      popSound.play();
-      setTimeout(()=>{
-        const sr=star.getBoundingClientRect(), rr=raccoon.getBoundingClientRect();
-        if(sr.bottom>=rr.top&&sr.left<rr.right&&sr.right>rr.left){
-          caught++;
-          catchSound.play();
-        }
-        star.remove();
-      },2000);
-      total++;
-      if(total<15) setTimeout(dropStar,2000);
+    let score = 0;
+    let gameTimer;
+    let starInterval;
+    let currentStage = 1;
+    let gameRunning = false;
+    
+    const stages = [
+      { starDropInterval: 1500, starSwayAmplitude: 10, starSpeed: 4000, rainbowStarChance: 0, requiredScore: 15 },
+      { starDropInterval: 1200, starSwayAmplitude: 20, starSpeed: 3500, rainbowStarChance: 0, requiredScore: 15 },
+      { starDropInterval: 1000, starSwayAmplitude: 15, starSpeed: 3000, rainbowStarChance: 0.2, requiredScore: 15 }
+    ];
+
+    const proverbs = [
+      { text: '知識ではなく、智恵を求めよ。知識は産物だが、智恵は未来をもたらす。', image: 'indian.png', tribe: 'ラムビー族' },
+      { text: '日と夜、季節、星、太陽。その移ろいを見れば、ひとより偉大な何かの存在を思わずにはいられない。', image: 'indian.png', tribe: 'チェロキー族' },
+      { text: '自分より偉大なものには、つねに畏敬の念をもて。', image: 'indian.png', tribe: 'ショショネ族' },
+      { text: '善人にも、悪人にも雨は降り、陽は昇る。', image: 'indian.png', tribe: 'ホピ族' },
+      { text: '創世記はいまも続いている。', image: 'indian.png', tribe: 'ラコタ族' },
+      { text: 'まっすぐに、しゃべれば、光線のように、こころに届く', image: 'indian.png', tribe: 'アパッチ族' },
+      { text: 'かんしゃくを起こすと、友人を失う。嘘をつくと、自分自身を失う。', image: 'indian.png', tribe: 'ホピ族' },
+      { text: '親切とは、言葉をつつしみ、人を傷つけないように心がけることだ。', image: 'indian.png', tribe: 'オハマ族' },
+      { text: '慎ましく食べ、慎んでしゃべる。そして誰も傷つけない。', image: 'indian.png', tribe: 'ホピ族' },
+      { text: '私の前を歩くな、私が従うとは限らない。私の後を歩くな、私が導くとは限らない。私と共に歩け、私たちはひとつなのだから。', image: 'indian.png', tribe: 'ソーク族' },
+      { text: '感謝する理由がみつからなければ落ち度はあなた自身にある。', image: 'indian.png', tribe: 'ミンカス族' },
+      { text: '歩いた足跡でひとは永遠に知られる。', image: 'indian.png', tribe: 'ダコタ族' },
+      { text: '思考は矢のように放たれたら、的を射る。注意しないと自分の放った矢で倒れることになる。', image: 'indian.png', tribe: 'ナバホ族' },
+      { text: '怒りは自分に盛る毒。', image: 'indian.png', tribe: 'ホピ族' },
+      { text: '死は存在しない生きる世界が変わるだけだ。', image: 'indian.png', tribe: 'ドゥワミッシュ族' },
+      { text: '目で判断せずに、こころで判断しろ。', image: 'indian.png', tribe: 'シャイアン族' },
+      { text: '過ちを見てそれを正そうとしなければ過ちを犯した者と同罪だ。', image: 'indian.png', tribe: 'オマハ族' },
+      { text: '素晴らしい夢を見てそれを行動に移せ。', image: 'indian.png', tribe: 'ナバホ族' },
+      { text: '昨日のことで今日を消耗させてはならない。', image: 'indian.png', tribe: 'チェロキー族' },
+      { text: '秘密などというものはない。謎などというものもない。それらはただの常識にすぎない。', image: 'indian.png', tribe: 'オノンダガ族' },
+      { text: '泣くことをおそれずに。泣くことは、悲しみにあふれたあなたのこころを解き放つ。', image: 'indian.png', tribe: 'ホピ族' },
+      { text: '真実の言葉とは、深くこころに沈んでそこにとどまるもの。', image: 'indian.png', tribe: 'オグララ・ラコタ族' },
+      { text: '飢えた人間は狼と一緒でも食べる。', image: 'indian.png', tribe: 'オクラホマ族' },
+      { text: '1本の指では小石すら持ち上げられぬ。', image: 'indian.png', tribe: 'ホピ族' },
+      { text: '見た目のよい男というものが、ただ顔の造作がよいだけのこともある。', image: 'indian.png', tribe: 'アパッチ族' },
+      { text: '宇宙はわれわれひちりひとりのなかにある。', image: 'indian.png', tribe: 'オグララ・ラコタ族' },
+      { text: '貧乏は謙遜の首を縄で絞めながら、神と人間にたいする無礼を飼育する。', image: 'indian.png', tribe: 'ラコタ族' },
+      { text: '人生はあげることと、もらうことの両方である。', image: 'indian.png', tribe: 'モホーク族' },
+      { text: '宗教はひとつのこらず神のもとに帰るための足がかりにすぎない。', image: 'indian.png', tribe: 'パウニー族' },
+      { text: 'いのちあるものすべてにいたわりを。', image: 'indian.png', tribe: 'オマハ族' },
+      { text: 'わたしが愛するのは、お金への愛に生きていない人たち。', image: 'indian.png', tribe: 'ドゥワミッシュ族' },
+      { text: 'あぶく銭は怠け者をつくる。', image: 'indian.png', tribe: 'アラバホ族' },
+      { text: '師は教えることでまた学んでいる。', image: 'indian.png', tribe: 'ソーク族' },
+      { text: '神の名は無意味、世界にとってほんとうの神はあいなのだ。', image: 'indian.png', tribe: 'アパッチ族' },
+      { text: '少しずつ少しずつ行けるところまで進む。', image: 'indian.png', tribe: 'アラバホ族' },
+      { text: '死はつねに季節はずれにやってくる。', image: 'indian.png', tribe: 'ポウニー族' },
+      { text: 'ひとびとのこころに真の平和が宿るまで、国と国との間に平和はやってこない。', image: 'indian.png', tribe: 'スー族' },
+      { text: 'どんなことも7世代先まで考えて決めなければならない。', image: 'indian.png', tribe: 'イロコイ族' }
+    ];
+
+    function updateScore(points) {
+      score += points;
+      scoreDisplay.textContent = score;
     }
 
-    function endGame(){
-      playing=false;
-      message.style.display='block';
-      if(caught>=10){
+    function dropStar() {
+      if (!gameRunning) return;
+      const stageConfig = stages[currentStage - 1];
+
+      const star = document.createElement('img');
+      let isRainbow = false;
+      if (currentStage === 3 && Math.random() < stageConfig.rainbowStarChance) {
+        star.src = '星レインボー.PNG';
+        star.className = 'star rainbow';
+        isRainbow = true;
+      } else {
+        star.src = '星ノーマル.PNG';
+        star.className = 'star';
+      }
+
+      star.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+      star.style.animationDuration = `${stageConfig.starSpeed / 1000}s, 2s`;
+      document.styleSheets[0].insertRule(`@keyframes sway { 0% { transform: translateX(0); } 50% { transform: translateX(${stageConfig.starSwayAmplitude}px); } 100% { transform: translateX(0); } }`);
+      
+      gameArea.appendChild(star);
+
+      if (isRainbow) {
+          popSoundRainbow.play();
+      } else {
+          popSound.play();
+      }
+
+      let starPosition = 0;
+      const checkCollision = setInterval(() => {
+        const sr = star.getBoundingClientRect();
+        const rr = raccoon.getBoundingClientRect();
+
+        if (sr.bottom >= rr.top && sr.left < rr.right && sr.right > rr.left) {
+          updateScore(isRainbow ? 2 : 1);
+          if (isRainbow) {
+              catchSoundRainbow.play();
+          } else {
+              catchSound.play();
+          }
+          star.remove();
+          clearInterval(checkCollision);
+        } else if (sr.top > window.innerHeight) {
+          star.remove();
+          clearInterval(checkCollision);
+        }
+      }, 50);
+    }
+
+    function startGame() {
+      resetGame();
+      gameRunning = true;
+      messageOverlay.style.display = 'none';
+
+      stageDisplay.textContent = currentStage;
+      const stageConfig = stages[currentStage - 1];
+      
+      let timeLeft = 30;
+      timerDisplay.textContent = timeLeft;
+
+      starInterval = setInterval(dropStar, stageConfig.starDropInterval);
+      gameTimer = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(gameTimer);
+          clearInterval(starInterval);
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function endGame() {
+      gameRunning = false;
+      messageOverlay.style.display = 'flex';
+
+      const stageConfig = stages[currentStage - 1];
+
+      if (score >= stageConfig.requiredScore) {
         bgmClear.play();
-        // 以下のURLをあなたのインディアン画像URLに置き換えてください
-        message.innerHTML='<img id="indian" src="インディアン画像のURL" /><br>子は親の背を見て育つ';
+        if (currentStage === 3) {
+          messageContent.innerHTML = `<p>全ステージクリア！</p>`;
+          nextButton.style.display = 'none';
+          retryButton.textContent = '最初からやり直す';
+          retryButton.style.display = 'block';
+        } else {
+          messageContent.innerHTML = `<p>ステージ ${currentStage} クリア！</p>`;
+          nextButton.style.display = 'block';
+          retryButton.style.display = 'none';
+        }
       } else {
         bgmFail.play();
-        message.innerHTML='またチャレンジしてみよう';
+        const randomProverb = proverbs[Math.floor(Math.random() * proverbs.length)];
+        messageContent.innerHTML = `
+          <img src="${randomProverb.image}" alt="インディアンの画像" />
+          <p>${randomProverb.tribe}の格言</p>
+          <h2>${randomProverb.text}</h2>
+        `;
+        messageContent.innerHTML += `<p>ステージ ${currentStage} 失敗</p><p>またチャレンジしてみよう</p>`;
+        nextButton.style.display = 'none';
+        retryButton.textContent = '再チャレンジ';
+        retryButton.style.display = 'block';
       }
     }
 
-    function startGame(){
-      dropStar();
-      setTimeout(endGame,30000);
+    function resetGame() {
+      score = 0;
+      scoreDisplay.textContent = 0;
+      document.querySelectorAll('.star').forEach(star => star.remove());
+      messageOverlay.style.display = 'none';
     }
 
-    let startX=null;
-    window.addEventListener('touchstart',e=>{ startX=e.touches[0].clientX; });
-    window.addEventListener('touchmove',e=>{
-      if(startX===null)return;
-      const deltaX=e.touches[0].clientX-startX;
-      let newLeft=raccoon.offsetLeft+deltaX;
-      raccoon.style.left=Math.min(Math.max(0,newLeft),window.innerWidth-80)+'px';
-      startX=e.touches[0].clientX;
+    function nextStage() {
+      currentStage++;
+      if (currentStage > 3) {
+        currentStage = 1; 
+      }
+      startGame();
+    }
+
+    function retryStage() {
+      if (currentStage === 3 && retryButton.textContent === '最初からやり直す') {
+        currentStage = 1;
+      }
+      startGame();
+    }
+
+    let startX = null;
+    window.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
+    window.addEventListener('touchmove', e => {
+      if (!gameRunning || startX === null) return;
+      e.preventDefault();
+      const deltaX = e.touches[0].clientX - startX;
+      let newLeft = raccoon.offsetLeft + deltaX;
+      raccoon.style.left = Math.min(Math.max(0, newLeft), window.innerWidth - raccoon.offsetWidth) + 'px';
+      startX = e.touches[0].clientX;
     });
-    window.onload=startGame;
+
+    nextButton.addEventListener('click', nextStage);
+    retryButton.addEventListener('click', retryStage);
+
+    window.onload = startGame;
   </script>
 </body>
 </html>
-
