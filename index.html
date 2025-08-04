@@ -2,11 +2,12 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ココペリオン</title>
   <style>
     body {
-      margin: 0; padding: 0;
+      margin: 0;
+      padding: 0;
       background: black;
       overflow: hidden;
       font-family: sans-serif;
@@ -15,16 +16,9 @@
       position: relative;
       width: 100vw;
       height: 100vh;
-      background-image: url('background.png'); /* 夜空背景画像 */
+      background-image: url('background.png');
       background-size: cover;
       background-position: center;
-    }
-    @keyframes kokopelli-dance {
-      0%   { transform: rotate(0deg); }
-      25%  { transform: rotate(15deg); }
-      50%  { transform: rotate(-15deg); }
-      75%  { transform: rotate(10deg); }
-      100% { transform: rotate(0deg); }
     }
     #kokopelli {
       position: absolute;
@@ -32,12 +26,17 @@
       left: 5%;
       width: 100px;
       z-index: 10;
-      animation: kokopelli-dance 2.5s ease-in-out infinite;
-      transform-origin: bottom center;
+      animation: kokopelliDance 4s infinite ease-in-out;
     }
+    @keyframes kokopelliDance {
+      0% { transform: rotate(-15deg); }
+      50% { transform: rotate(15deg); }
+      100% { transform: rotate(-15deg); }
+    }
+
     #raccoon {
       position: absolute;
-      bottom: 60px;
+      bottom: 10px;
       left: 50%;
       transform: translateX(-50%);
       width: 120px;
@@ -46,7 +45,7 @@
     .star {
       position: absolute;
       width: 40px;
-      animation-name: drop;
+      animation-name: drop, sway;
       animation-timing-function: linear;
       animation-iteration-count: 1;
       opacity: 0;
@@ -68,12 +67,12 @@
       75% { transform: translateX(-20px); }
       100% { transform: translateX(0); }
     }
+
     #score-display, #timer-display, #stage-display {
       position: absolute;
       color: white;
       font-size: 20px;
       z-index: 20;
-      user-select: none;
     }
     #score-display { top: 10px; right: 10px; }
     #timer-display { top: 10px; right: 150px; }
@@ -93,29 +92,21 @@
       text-align: center;
       padding: 20px;
     }
-    #message-overlay p {
-      font-size: 1.3em;
-      margin: 10px 0;
+    #message-overlay img {
+      width: 150px;
+      margin: 20px 0;
     }
     #message-overlay button {
       font-size: 18px;
       padding: 10px 20px;
       margin-top: 20px;
-      cursor: pointer;
-      border-radius: 5px;
-      border: none;
-      background-color: #4CAF50;
-      color: white;
-    }
-    #message-overlay button:hover {
-      background-color: #45a049;
     }
   </style>
 </head>
 <body>
   <div id="game-area">
-    <img id="kokopelli" src="kokopelli.png" alt="ココペリ" />
-    <img id="raccoon" src="raccoon.png" alt="アライグマ" />
+    <img id="kokopelli" src="kokopelli.png" />
+    <img id="raccoon" src="raccoon.png" />
     <div id="score-display">スコア: <span id="score">0</span></div>
     <div id="timer-display">残り: <span id="timer">30</span>秒</div>
     <div id="stage-display">ステージ: <span id="stage">1</span></div>
@@ -126,192 +117,3 @@
     <button id="next-button">次へ</button>
     <button id="retry-button">もう一度</button>
   </div>
-
-  <audio id="sound-pop" src="star_pop.mp3"></audio>
-  <audio id="sound-catch" src="star_catch.mp3"></audio>
-  <audio id="sound-catch-rainbow" src="star_catch_rainbow.mp3"></audio>
-  <audio id="bgm-clear" src="clear_bgm.mp3"></audio>
-  <audio id="bgm-fail" src="fail_bgm.mp3"></audio>
-
-  <script>
-    // ステージ設定（ステージ1だけ速度調整済み）
-    const stages = [
-      { dropInterval: 1800, sway: false, speed: 4500, goal: 20, rainbow: 0 },
-      { dropInterval: 1500, sway: true, speed: 4500, goal: 30, rainbow: 0 },
-      { dropInterval: 1000, sway: true, speed: 3000, goal: 40, rainbow: 0.3 }
-    ];
-
-    // 失敗時にランダム表示する格言リスト
-    const failureWisdoms = [
-      "知識ではなく、智恵を求めよ。知識は産物だが、智恵は未来をもたらす。（ラムビー族）",
-      "日と夜、季節、星、太陽。その移ろいを見れば、ひとより偉大な何かの存在を思わずにはいられない。（チェロキー族）",
-      "自分より偉大なものには、つねに畏敬の念をもて。（ショショネ族）",
-      "善人にも、悪人にも雨は降り、陽は昇る。（ホピ族）",
-      "創世記はいまも続いている。（ラコタ族）",
-      "まっすぐに、しゃべれば、光線のように、こころに届く。（アパッチ族）",
-      "かんしゃくを起こすと、友人を失う。嘘をつくと、自分自身を失う。（ホピ族）",
-      "親切とは、言葉をつつしみ、人を傷つけないように心がけることだ。（オハマ族）",
-      "慎ましく食べ、慎んでしゃべる。そして誰も傷つけない。（ホピ族）",
-      "私の前を歩くな、私が従うとは限らない。私の後を歩くな、私が導くとは限らない。私と共に歩け、私たちはひとつなのだから。（ソーク族）",
-      "感謝する理由がみつからなければ落ち度はあなた自身にある。（ミンカス族）",
-      "歩いた足跡でひとは永遠に知られる。（ダコタ族）",
-      "思考は矢のように放たれたら、的を射る。注意しないと自分の放った矢で倒れることになる。（ナバホ族）",
-      "怒りは自分に盛る毒。（ホピ族）",
-      "死は存在しない生きる世界が変わるだけだ。（ドゥワミッシュ族）",
-      "目で判断せずに、こころで判断しろ。（シャイアン族）",
-      "過ちを見てそれを正そうとしなければ過ちを犯した者と同罪だ。（オマハ族）",
-      "素晴らしい夢を見てそれを行動に移せ。（ナバホ族）",
-      "昨日のことで今日を消耗させてはならない。（チェロキー族）",
-      "秘密などというものはない。謎などというものもない。それらはただの常識にすぎない。（オノンダガ族）",
-      "泣くことをおそれずに。泣くことは、悲しみにあふれたあなたのこころを解き放つ。（ホピ族）",
-      "真実の言葉とは、深くこころに沈んでそこにとどまるもの。（オグララ・ラコタ族）",
-      "飢えた人間は狼と一緒で何でも食べる。（オクラホマ族）",
-      "1本の指では小石すら持ち上げられぬ。（ホピ族）",
-      "見た目のよい男というものが、ただ顔の造作がよいだけのこともある。（アパッチ族）",
-      "宇宙はわれわれひちりひとりのなかにある。（オグララ・ラコタ族）",
-      "貧乏は謙遜の首を縄で絞めながら、神と人間にたいする無礼を飼育する。（ラコタ族）",
-      "人生はあげることと、もらうことの両方である。（モホーク族）",
-      "宗教はひとつのこらず神のもとに帰るための足がかりにすぎない。（パウニー族）",
-      "いのちあるものすべてにいたわりを。（オマハ族）",
-      "わたしが愛するのは、お金への愛に生きていない人たち。（ドゥワミッシュ族）",
-      "あぶく銭は怠け者をつくる。（アラバホ族）",
-      "師は教えることでまた学んでいる。（ソーク族）",
-      "歩いた足跡でひとは永遠に知られる。（ダコタ族）",
-      "神の名は無意味、世界にとってほんとうの神はあいなのだ。（アパッチ族）",
-      "少しずつ少しずつ行けるところまで進む。（アラバホ族）",
-      "死はつねに季節はずれにやってくる。（ポウニー族）",
-      "ひとびとのこころに真の平和が宿るまで、国と国との間に平和はやってこない。（スー族）",
-      "どんなことも7世代先まで考えて決めなければならない。（イロコイ族）"
-    ];
-
-    let stage = 0, score = 0, time = 30, interval, timer, running = false;
-
-    const raccoon = document.getElementById('raccoon');
-    const kokopelli = document.getElementById('kokopelli');
-    const area = document.getElementById('game-area');
-    const scoreEl = document.getElementById('score');
-    const timerEl = document.getElementById('timer');
-    const stageEl = document.getElementById('stage');
-    const message = document.getElementById('message-overlay');
-    const messageContent = document.getElementById('message-content');
-    const nextButton = document.getElementById('next-button');
-    const retryButton = document.getElementById('retry-button');
-    const pop = document.getElementById('sound-pop');
-    const catchSound = document.getElementById('sound-catch');
-    const catchRainbow = document.getElementById('sound-catch-rainbow');
-    const clearBgm = document.getElementById('bgm-clear');
-    const failBgm = document.getElementById('bgm-fail');
-
-    function startStage() {
-      score = 0;
-      time = 30;
-      scoreEl.textContent = score;
-      timerEl.textContent = time;
-      stageEl.textContent = stage + 1;
-      message.style.display = 'none';
-      running = true;
-      interval = setInterval(spawnStar, stages[stage].dropInterval);
-      timer = setInterval(() => {
-        time--;
-        timerEl.textContent = time;
-        if (time <= 0) endStage();
-      }, 1000);
-    }
-
-    function spawnStar() {
-      const s = document.createElement('img');
-      const isRainbow = Math.random() < stages[stage].rainbow;
-      s.src = isRainbow ? 'star_rainbow.png' : 'star_normal.png';
-      s.className = 'star visible' + (isRainbow ? ' rainbow' : '');
-      if (!stages[stage].sway) {
-        s.style.animationName = 'drop';
-        s.style.animationDuration = `${stages[stage].speed}ms`;
-      } else {
-        s.style.animation = `drop ${stages[stage].speed}ms linear 1, sway 2000ms linear infinite`;
-      }
-      s.style.left = Math.random() * (window.innerWidth - s.width) + 'px';
-      area.appendChild(s);
-      pop.currentTime = 0;
-      pop.play();
-
-      const check = setInterval(() => {
-        const sr = s.getBoundingClientRect();
-        const rr = raccoon.getBoundingClientRect();
-        if (sr.bottom >= rr.top && sr.left < rr.right && sr.right > rr.left) {
-          score += isRainbow ? 2 : 1;
-          scoreEl.textContent = score;
-          if (isRainbow) {
-            catchRainbow.currentTime = 0;
-            catchRainbow.play();
-          } else {
-            catchSound.currentTime = 0;
-            catchSound.play();
-          }
-          s.remove();
-          clearInterval(check);
-        } else if (sr.top > window.innerHeight) {
-          s.remove();
-          clearInterval(check);
-        }
-      }, 50);
-    }
-
-    function endStage() {
-      clearInterval(interval);
-      clearInterval(timer);
-      running = false;
-
-      if (score >= stages[stage].goal) {
-        clearBgm.currentTime = 0;
-        clearBgm.play();
-        messageContent.innerHTML = `<p>ステージ${stage + 1}クリア！</p>`;
-        nextButton.style.display = stage < stages.length -1 ? 'inline-block' : 'none';
-        retryButton.style.display = 'none';
-      } else {
-        failBgm.currentTime = 0;
-        failBgm.play();
-        // ランダムで格言を表示
-        const wisdom = failureWisdoms[Math.floor(Math.random() * failureWisdoms.length)];
-        messageContent.innerHTML = `<p>ステージ${stage + 1}失敗…</p><p>「${wisdom}」</p>`;
-        nextButton.style.display = 'none';
-        retryButton.style.display = 'inline-block';
-      }
-      message.style.display = 'flex';
-    }
-
-    nextButton.onclick = () => {
-      stage++;
-      startStage();
-    };
-
-    retryButton.onclick = () => {
-      startStage();
-    };
-
-    // スマホのスワイプ操作でアライグマ左右移動
-    let startX = null;
-    window.addEventListener('touchstart', e => {
-      if(!running) return;
-      startX = e.touches[0].clientX;
-    });
-    window.addEventListener('touchmove', e => {
-      if (!running || startX === null) return;
-      const deltaX = e.touches[0].clientX - startX;
-      let newLeft = raccoon.offsetLeft + deltaX;
-      // 画面端制限
-      newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
-      raccoon.style.left = newLeft + 'px';
-      startX = e.touches[0].clientX;
-    });
-    window.addEventListener('touchend', () => {
-      startX = null;
-    });
-
-    // 初期開始
-    window.onload = () => {
-      stage = 0;
-      startStage();
-    };
-  </script>
-</body>
-</html>
