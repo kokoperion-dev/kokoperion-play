@@ -16,7 +16,7 @@
       position: relative;
       width: 100vw;
       height: 100vh;
-      background-image: url('background.PNG'); /* ファイル名を修正 */
+      background-image: url('background.PNG');
       background-size: cover;
       background-position: center;
     }
@@ -29,7 +29,7 @@
     }
     #raccoon {
       position: absolute;
-      bottom: 100px; /* アライグマの位置を100pxに修正 */
+      bottom: 30px;
       left: 50%;
       transform: translateX(-50%);
       width: 120px;
@@ -127,7 +127,9 @@
 </head>
 <body>
   <div id="game-area">
-    <img id="kokopelli" src="kokopelli.JPG" /> <img id="raccoon" src="raccoon.PNG" /> <div id="stage-display">ステージ: <span id="stage-num">1</span></div>
+    <img id="kokopelli" src="kokopell.JPG" />
+    <img id="raccoon" src="raccoon.PNG" />
+    <div id="stage-display">ステージ: <span id="stage-num">1</span></div>
     <div id="score-display">スコア: <span id="score">0</span></div>
     <div id="timer-display">残り時間: <span id="timer">30</span>秒</div>
   </div>
@@ -228,13 +230,15 @@
       const star = document.createElement('img');
       let isRainbow = false;
       if (currentStage === 3 && Math.random() < stageConfig.rainbowStarChance) {
-        star.src = 'star_rainbow.PNG'; /* ファイル名を修正 */
+        star.src = 'star_rainbow.PNG';
         star.className = 'star rainbow';
         isRainbow = true;
       } else {
-        star.src = 'star_normal.PNG'; /* ファイル名を修正 */
+        star.src = 'star_normal.PNG';
         star.className = 'star';
       }
+
+      star.classList.add('visible');
 
       star.style.left = Math.random() * (window.innerWidth - 50) + 'px';
       star.style.animationDuration = `${stageConfig.starSpeed / 1000}s, 2s`;
@@ -270,6 +274,11 @@
     }
 
     function startGame() {
+      bgmClear.pause();
+      bgmClear.currentTime = 0;
+      bgmFail.pause();
+      bgmFail.currentTime = 0;
+
       resetGame();
       gameRunning = true;
       messageOverlay.style.display = 'none';
@@ -354,7 +363,9 @@
       e.preventDefault();
       const deltaX = e.touches[0].clientX - startX;
       let newLeft = raccoon.offsetLeft + deltaX;
-      raccoon.style.left = Math.min(Math.max(0, newLeft), window.innerWidth - raccoon.offsetWidth) + 'px';
+      newLeft = Math.min(Math.max(0, newLeft), window.innerWidth - raccoon.offsetWidth);
+      
+      raccoon.style.left = newLeft + 'px';
       startX = e.touches[0].clientX;
     });
 
