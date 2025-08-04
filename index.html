@@ -1,3 +1,8 @@
+チャットGPT案
+
+<details>
+<summary>▼ HTMLコードを表示（クリック）</summary>
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -26,11 +31,12 @@
       left: 5%;
       width: 100px;
       z-index: 10;
-      animation: float-y 5s ease-in-out infinite alternate;
+      animation: float 3s ease-in-out infinite alternate;
     }
-    @keyframes float-y {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(20px); }
+    @keyframes float {
+      0% { transform: translateX(0); }
+      50% { transform: translateX(20px); }
+      100% { transform: translateX(-20px); }
     }
     #raccoon {
       position: absolute;
@@ -43,6 +49,9 @@
     .star {
       position: absolute;
       width: 40px;
+      animation-name: drop, sway;
+      animation-timing-function: linear;
+      animation-iteration-count: 1;
       opacity: 0;
       transition: opacity 0.5s;
     }
@@ -52,19 +61,14 @@
     .star.visible {
       opacity: 1;
     }
-    .star.drop {
-      animation: drop linear forwards;
-    }
-    .star.sway {
-      animation: drop linear forwards, sway 2s linear infinite;
-    }
     @keyframes drop {
       from { top: 0; }
       to { top: 100%; }
     }
     @keyframes sway {
       0% { transform: translateX(0); }
-      50% { transform: translateX(30px); }
+      25% { transform: translateX(20px); }
+      75% { transform: translateX(-20px); }
       100% { transform: translateX(0); }
     }
     #score-display, #timer-display, #stage-display {
@@ -72,7 +76,6 @@
       color: white;
       font-size: 20px;
       z-index: 20;
-      text-shadow: 2px 2px 4px #000;
     }
     #score-display { top: 10px; right: 10px; }
     #timer-display { top: 10px; right: 150px; }
@@ -100,14 +103,6 @@
       font-size: 18px;
       padding: 10px 20px;
       margin-top: 20px;
-      cursor: pointer;
-    }
-    #message-content h2 {
-      font-size: 2em;
-      margin-bottom: 0.5em;
-    }
-    #message-content p {
-      font-size: 1.2em;
     }
   </style>
 </head>
@@ -116,33 +111,33 @@
     <img id="kokopelli" src="kokopelli.PNG" />
     <img id="raccoon" src="raccoon.PNG" />
     <div id="score-display">スコア: <span id="score">0</span></div>
-    <div id="timer-display">残り: <span id="timer">60</span>秒</div>
+    <div id="timer-display">残り: <span id="timer">30</span>秒</div>
     <div id="stage-display">ステージ: <span id="stage">1</span></div>
   </div>
 
   <div id="message-overlay">
     <div id="message-content"></div>
-    <button id="next-button">次のステージへ</button>
+    <button id="next-button">次へ</button>
     <button id="retry-button">もう一度</button>
   </div>
 
-  <audio id="sound-pop" src="star_pop.mp3" preload="auto"></audio>
-  <audio id="sound-catch" src="star_catch.mp3" preload="auto"></audio>
-  <audio id="sound-catch-rainbow" src="star_catch_rainbow.mp3" preload="auto"></audio>
-  <audio id="bgm-clear" src="clear_bgm.mp3" preload="auto"></audio>
-  <audio id="bgm-fail" src="fail_bgm.mp3" preload="auto"></audio>
+  <audio id="sound-pop" src="star_pop.mp3"></audio>
+  <audio id="sound-catch" src="star_catch.mp3"></audio>
+  <audio id="sound-catch-rainbow" src="star_catch_rainbow.mp3"></audio>
+  <audio id="bgm-clear" src="clear_bgm.mp3"></audio>
+  <audio id="bgm-fail" src="fail_bgm.mp3"></audio>
 
   <script>
     const stages = [
-      { dropInterval: 3000, sway: false, speed: 10000, goal: 15, rainbow: 0 },
-      { dropInterval: 2500, sway: true, speed: 8000, goal: 20, rainbow: 0 },
-      { dropInterval: 2000, sway: true, speed: 6000, goal: 30, rainbow: 0.3 }
+      { dropInterval: 2000, sway: false, speed: 5000, goal: 20, rainbow: 0 },
+      { dropInterval: 1500, sway: true, speed: 4500, goal: 30, rainbow: 0 },
+      { dropInterval: 1000, sway: true, speed: 3000, goal: 40, rainbow: 0.3 }
     ];
 
-    let stage = 0, score = 0, time = 60, interval, timer, running = false;
-    let raccoonPosition = 50; // アライグマの初期位置をパーセンテージで管理
+    let stage = 0, score = 0, time = 30, interval, timer, running = false;
 
     const raccoon = document.getElementById('raccoon');
+    const kokopelli = document.getElementById('kokopelli');
     const area = document.getElementById('game-area');
     const scoreEl = document.getElementById('score');
     const timerEl = document.getElementById('timer');
@@ -158,10 +153,8 @@
     const failBgm = document.getElementById('bgm-fail');
 
     function startStage() {
-      // 既存の星をすべて削除
-      document.querySelectorAll('.star').forEach(s => s.remove());
       score = 0;
-      time = 60; // プレイ時間を60秒に延長
+      time = 30;
       scoreEl.textContent = score;
       timerEl.textContent = time;
       stageEl.textContent = stage + 1;
@@ -179,30 +172,21 @@
       const s = document.createElement('img');
       const isRainbow = Math.random() < stages[stage].rainbow;
       s.src = isRainbow ? 'star_rainbow.PNG' : 'star_normal.PNG';
-      s.className = `star visible ${stages[stage].sway ? 'sway' : 'drop'}`;
+      s.className = 'star visible';
+      if (!stages[stage].sway) s.style.animationName = 'drop';
+      else s.style.animation = `drop ${stages[stage].speed}ms linear, sway 2s linear infinite`;
       s.style.left = Math.random() * (window.innerWidth - 50) + 'px';
       s.style.animationDuration = `${stages[stage].speed}ms`;
       area.appendChild(s);
-      pop.currentTime = 0; // 再生位置をリセット
       pop.play();
-
       const check = setInterval(() => {
-        if (!running) {
-          clearInterval(check);
-          return;
-        }
         const sr = s.getBoundingClientRect();
         const rr = raccoon.getBoundingClientRect();
         if (sr.bottom >= rr.top && sr.left < rr.right && sr.right > rr.left) {
           score += isRainbow ? 2 : 1;
           scoreEl.textContent = score;
-          if (isRainbow) {
-            catchRainbow.currentTime = 0;
-            catchRainbow.play();
-          } else {
-            catchSound.currentTime = 0;
-            catchSound.play();
-          }
+          if (isRainbow) catchRainbow.play();
+          else catchSound.play();
           s.remove();
           clearInterval(check);
         } else if (sr.top > window.innerHeight) {
@@ -216,59 +200,31 @@
       clearInterval(interval);
       clearInterval(timer);
       running = false;
-      document.querySelectorAll('.star').forEach(s => s.remove()); // 残っている星を削除
-      
-      const isCleared = score >= stages[stage].goal;
-
-      if (isCleared) {
-        clearBgm.currentTime = 0;
+      if (score >= stages[stage].goal) {
         clearBgm.play();
-        messageContent.innerHTML = `<h2>ステージ${stage + 1}クリア！</h2><p>目標スコア：${stages[stage].goal} / あなたのスコア：${score}</p>`;
-        if (stage < stages.length - 1) {
-          nextButton.style.display = 'inline-block';
-          retryButton.style.display = 'none';
-        } else {
-          messageContent.innerHTML = `<h2>全ステージクリア！</h2><p>ゲームクリアです！</p>`;
-          nextButton.style.display = 'none';
-          retryButton.textContent = '最初からプレイ';
-          retryButton.style.display = 'inline-block';
-        }
+        messageContent.innerHTML = `<p>ステージ${stage + 1}クリア！</p>`;
+        nextButton.style.display = stage < 2 ? 'inline-block' : 'none';
       } else {
-        failBgm.currentTime = 0;
         failBgm.play();
-        messageContent.innerHTML = `<h2>ステージ${stage + 1}失敗...</h2><p>目標スコア：${stages[stage].goal} / あなたのスコア：${score}</p>`;
+        messageContent.innerHTML = `<p>ステージ${stage + 1}失敗…</p>`;
         nextButton.style.display = 'none';
-        retryButton.textContent = 'もう一度';
-        retryButton.style.display = 'inline-block';
       }
+      retryButton.style.display = 'inline-block';
       message.style.display = 'flex';
     }
 
     nextButton.onclick = () => { stage++; startStage(); };
-    retryButton.onclick = () => { 
-      if (score < stages[stage].goal) { // 失敗時
-        startStage();
-      } else { // 全ステージクリア時
-        stage = 0; 
-        startStage();
-      }
-    };
+    retryButton.onclick = () => { if (stage > 2) stage = 0; startStage(); };
 
     // スマホスワイプ操作
     let startX = null;
-    window.addEventListener('touchstart', e => {
-      if (!running) return;
-      startX = e.touches[0].clientX;
-    });
+    window.addEventListener('touchstart', e => startX = e.touches[0].clientX);
     window.addEventListener('touchmove', e => {
       if (!running || startX === null) return;
       const deltaX = e.touches[0].clientX - startX;
-      // ウィンドウ幅に対するパーセンテージで移動
-      let newPosition = raccoonPosition + (deltaX / window.innerWidth) * 100;
-      newPosition = Math.max(0, Math.min(100, newPosition));
-      raccoon.style.left = newPosition + '%';
-      raccoon.style.transform = `translateX(-50%)`;
-      raccoonPosition = newPosition;
+      let newLeft = raccoon.offsetLeft + deltaX;
+      newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
+      raccoon.style.left = newLeft + 'px';
       startX = e.touches[0].clientX;
     });
 
@@ -276,3 +232,4 @@
   </script>
 </body>
 </html>
+</details>
