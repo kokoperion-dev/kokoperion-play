@@ -13,7 +13,7 @@
     <div id="game-container">
         <img id="kokopelli" src="kokopelli.png" alt="ココペリ">
         <img id="raccoon" src="raccoon.png" alt="アライグマ">
-        <img id="background" src="background.png" alt="背景">
+        <div id="background"></div>
         <div id="game-screen"></div>
         <div id="ui-overlay">
             <h1 id="title-text">ココペリの星</h1>
@@ -47,7 +47,9 @@ body {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: auto;
+    height: 100%;
+    background-image: url('background.png');
+    background-size: cover;
     z-index: -1;
 }
 
@@ -90,7 +92,8 @@ body {
     height: 30px;
     background-size: contain;
     animation-timing-function: linear;
-    animation: star-fall-wave 3s linear forwards; /* 全ての星にユラユラ落ちるアニメーションを適用 */
+    animation: star-fall-wave 3s linear forwards;
+    cursor: pointer;
 }
 
 .star.normal {
@@ -136,6 +139,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const bgm = document.getElementById('bgm');
     let currentStage = 0;
     let score = 0;
+    
+    const starSounds = {
+        normal: new Audio('star_pop.mp3'),
+        rainbow: new Audio('star_pop_rainbow.mp3'),
+        diamond: new Audio('star_diamond_catch.mp3') // ファイル名を統一しました
+    };
 
     const indianQuotes = [
         "ラムビー族の格言\n知識ではなく、智恵を求めよ。知識は産物だが、\n智恵は未来をもたらす。",
@@ -202,12 +211,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ratios: { normal: 0.2, rainbow: 0.7, diamond: 0.1 },
             clearScore: 60
         }
-    };
-
-    const soundEffects = {
-        normal: new Audio('star_catch.mp3'),
-        rainbow: new Audio('star_catch_rainbow.mp3'),
-        diamond: new Audio('star_diamond_catch.mp3') // 新しい効果音
     };
 
     startButton.addEventListener('click', () => {
@@ -277,8 +280,9 @@ document.addEventListener('DOMContentLoaded', () => {
         gameScreen.appendChild(star);
 
         star.addEventListener('click', () => {
-            if (soundEffects[starType]) {
-                soundEffects[starType].play();
+            const sound = starSounds[starType];
+            if (sound) {
+                sound.play();
             }
             score += starPoints[starType];
             star.remove();
