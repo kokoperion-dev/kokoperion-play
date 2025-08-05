@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ココペリの星</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="STYLE.CSS">
 </head>
 <body>
 
     <audio id="bgm" src="fail_bgm.mp3" loop></audio>
 
     <div id="game-container">
-        <img id="kokopelli" src="kokopelli.png" alt="ココペリ">
-        <img id="raccoon" src="raccoon.png" alt="アライグマ">
+        <img id="kokopelli" src="kokopelli.PNG" alt="ココペリ">
+        <img id="raccoon" src="raccoon.PNG" alt="アライグマ">
         <div id="background"></div>
         <div id="game-screen"></div>
         <div id="ui-overlay">
@@ -24,7 +24,7 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="SCRIPT.JS"></script>
 </body>
 </html>
 body {
@@ -48,7 +48,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('background.png');
+    background-image: url('background.PNG');
     background-size: cover;
     z-index: -1;
 }
@@ -97,15 +97,15 @@ body {
 }
 
 .star.normal {
-    background-image: url('star_normal.png');
+    background-image: url('star_normal.PNG');
 }
 
 .star.rainbow {
-    background-image: url('star_rainbow.png');
+    background-image: url('star_rainbow.PNG');
 }
 
 .star.diamond {
-    background-image: url('diamond.png');
+    background-image: url('diamond.PNG');
 }
 
 @keyframes star-fall-wave {
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const starSounds = {
         normal: new Audio('star_pop.mp3'),
         rainbow: new Audio('star_pop_rainbow.mp3'),
-        diamond: new Audio('star_diamond_catch.mp3') // ファイル名を統一しました
+        diamond: new Audio('star_diamond_catch.mp3')
     };
 
     const indianQuotes = [
