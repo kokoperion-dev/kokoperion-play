@@ -3,70 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ココペリオン 〜星と森とココペリオン</title>
+    <title>ココペリの星</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+    <audio id="bgm" src="fail_bgm.mp3" loop></audio>
+
     <div id="game-container">
-
-        <section id="title-screen" class="game-screen active">
-            <div class="background-image-container">
-                <img src="images/night_sky_background.png" alt="星空の背景" class="full-background-image">
-            </div>
-
-            <div class="characters-container">
-                <img src="images/kokoperi.png" alt="ココペリ" class="kokoperi-image">
-                <img src="images/raccoon.png" alt="アライグマ" class="raccoon-image">
-            </div>
-
-            <div class="falling-stars-animation-area">
-                <div class="falling-star star-demo-1"></div>
-                <div class="falling-star star-demo-2"></div>
-            </div>
-
-            <h1 class="game-title-text">KOKOPERION</h1>
-            <p class="game-subtitle-text">〜星と森とココペリオン〜</p>
-
-            <button id="start-game-button" class="game-button">はじめる</button>
-        </section>
-
-        <section id="play-screen" class="game-screen hidden">
-            <div class="background-image-container">
-                <img src="images/night_sky_background.png" alt="星空の背景" class="full-background-image">
-            </div>
-
-            <div class="play-area">
-                <img src="images/kokoperi.png" alt="ココペリ" class="kokoperi-play-image">
-
-                <img src="images/raccoon.png" alt="アライグマ" class="raccoon-player-image">
-
-                <div id="stars-drop-zone">
-                    </div>
-
-                <div class="score-display">星: <span id="current-score">0</span></div>
-            </div>
-
-            <button id="pause-button" class="game-button small-button">一時停止</button>
-        </section>
-
-        <section id="clear-screen" class="game-screen hidden">
-            <div class="background-image-container">
-                <img src="images/night_sky_background.png" alt="星空の背景" class="full-background-image">
-            </div>
-
-            <div class="clear-content">
-                <h2>クリアおめでとう！</h2>
-                <h3>インディアンの教え</h3>
-                <div id="indian-teachings-content">
-                    <p class="teaching-text">「すべての命はつながっている。自然の声に耳を傾け、感謝の心を忘れずに。」</p>
-                    <img src="images/teaching_illustration.png" alt="教えのイラスト" class="teaching-illustration">
-                </div>
-                <button id="back-to-title-button" class="game-button">タイトルへ戻る</button>
-                <button id="next-teaching-button" class="game-button">次の教えを見る</button>
-            </div>
-        </section>
-
+        <img id="kokopelli" src="kokopelli.PNG" alt="ココペリ">
+        <img id="raccoon" src="raccoon.PNG" alt="アライグマ">
+        <div id="background"></div>
+        <div id="game-screen"></div>
+        <div id="ui-overlay">
+            <h1 id="title-text">ココペリの星</h1>
+            <button id="start-button">ゲーム開始</button>
+            <div id="result-message"></div>
+            <button id="next-stage-button" class="hidden">次のステージへ</button>
+            <button id="restart-button" class="hidden">はじめから</button>
+        </div>
     </div>
 
     <script src="script.js"></script>
@@ -74,534 +29,281 @@
 </html>
 body {
     margin: 0;
-    overflow: hidden; /* スクロールバー非表示 */
-    font-family: 'Arial', sans-serif; /* 適宜フォント変更 */
-    background-color: #000; /* 全体の背景色 */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+    overflow: hidden;
+    background-color: #000;
+    font-family: sans-serif;
+    color: #fff;
+    text-align: center;
 }
 
 #game-container {
     position: relative;
     width: 100vw;
     height: 100vh;
-    max-width: 800px; /* 例: 最大幅を制限して、PCでも見やすく */
-    max-height: 900px; /* 例: 最大高さを制限 */
-    overflow: hidden;
-    /* このコンテナ自体は背景画像を持たず、各screenが持つ */
 }
 
-/* 各ゲーム画面の共通スタイル */
-.game-screen {
+#background {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('background.PNG');
+    background-size: cover;
+    z-index: -1;
+}
+
+#kokopelli {
+    position: absolute;
+    top: 5vh;
+    left: 5vw;
+    width: 150px;
+    animation: kokopelli-rotate 3s infinite ease-in-out;
+}
+
+@keyframes kokopelli-rotate {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(15deg); }
+}
+
+#raccoon {
+    position: absolute;
+    bottom: 5vh;
+    width: 150px;
+    animation: raccoon-move 15s infinite ease-in-out alternate;
+}
+
+@keyframes raccoon-move {
+    0% { left: 5vw; }
+    100% { left: calc(95vw - 150px); }
+}
+
+#game-screen {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    opacity: 0; /* 初期状態は非表示 */
-    transition: opacity 0.5s ease-in-out; /* 画面切り替え時のフェードアニメーション */
-    z-index: 1; /* 基本的な重なり順 */
 }
 
-.game-screen.active {
-    opacity: 1; /* 表示中の画面 */
-    z-index: 2; /* 最前面 */
-}
-
-.game-screen.hidden {
-    display: none; /* 非表示の画面は完全に消す */
-}
-
-
-/* 背景画像コンテナ（各画面に配置） */
-.background-image-container {
+.star {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0; /* 最背面 */
-}
-
-.full-background-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* コンテナいっぱいに表示し、アスペクト比を維持 */
-    filter: brightness(0.7); /* 少し暗くしてキャラクターや文字を際立たせる */
-}
-
-/* タイトル画面のスタイル */
-#title-screen {
-    justify-content: flex-end; /* 下部に要素を寄せる */
-    padding-bottom: 5%; /* 下からの余白 */
-}
-
-.characters-container {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1;
-}
-
-.kokoperi-image {
-    position: absolute;
-    top: 15%; /* 崖の上にいるイメージで調整 */
-    width: 40%; /* サイズ調整 */
-    max-width: 300px;
-    filter: drop-shadow(0 0 10px rgba(0, 200, 255, 0.5));
-    animation: floatAndGlow 4s ease-in-out infinite alternate; /* 浮遊感 */
-}
-
-.raccoon-image {
-    position: absolute;
-    bottom: 25%; /* ココペリの下に配置 */
-    width: 25%; /* サイズ調整 */
-    max-width: 180px;
-    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
-    animation: breathe 3s ease-in-out infinite alternate; /* 微妙な呼吸感 */
-}
-
-/* 降り注ぐ星のアニメーションエリア（タイトル画面のみ） */
-.falling-stars-animation-area {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    pointer-events: none; /* クリックイベントを透過させる */
-}
-
-/* 落ちる星のアニメーション（デモ用） */
-.falling-star {
-    position: absolute;
-    background-color: #FFF;
-    border-radius: 50%;
-    box-shadow: 0 0 10px #0FF, 0 0 20px #0FF;
-    opacity: 0;
-    animation: starFall 3s linear infinite;
-}
-
-.star-demo-1 {
-    width: 10px; height: 10px;
-    left: 20%; top: -10%;
-    animation-delay: 0s;
-}
-.star-demo-2 {
-    width: 8px; height: 8px;
-    left: 70%; top: -30%;
-    animation-delay: 1.5s;
-    animation-duration: 3.5s;
-}
-
-@keyframes starFall {
-    0% { transform: translateY(-50px) scale(0.5); opacity: 0; }
-    20% { opacity: 1; }
-    80% { transform: translateY(calc(100vh - 100px)) scale(1); opacity: 1; }
-    100% { transform: translateY(100vh) scale(0.5); opacity: 0; }
-}
-
-@keyframes floatAndGlow {
-    0% { transform: translateY(0px) rotate(0deg); filter: drop-shadow(0 0 10px rgba(0, 200, 255, 0.5)); }
-    50% { transform: translateY(-10px) rotate(2deg); filter: drop-shadow(0 0 15px rgba(0, 200, 255, 0.8)); }
-    100% { transform: translateY(0px) rotate(0deg); filter: drop-shadow(0 0 10px rgba(0, 200, 255, 0.5)); }
-}
-
-@keyframes breathe {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.02); }
-    100% { transform: scale(1); }
-}
-
-
-.game-title-text {
-    color: #4CAF50; /* 緑がかった青 */
-    font-size: 6vw;
-    font-weight: bold;
-    text-shadow: 0 0 15px rgba(0, 200, 255, 0.8), 0 0 25px rgba(0, 200, 255, 0.6);
-    margin-bottom: 0;
-    z-index: 2;
-    animation: fadeIn 2s ease-out forwards;
-    opacity: 0;
-}
-
-.game-subtitle-text {
-    color: #ADD8E6;
-    font-size: 2.5vw;
-    letter-spacing: 0.1vw;
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-    margin-top: 5px;
-    margin-bottom: 30px; /* ボタンとの間隔 */
-    z-index: 2;
-    animation: fadeIn 2.5s ease-out forwards;
-    opacity: 0;
-    animation-delay: 0.5s;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* ゲームボタンのスタイル */
-.game-button {
-    background-color: #4CAF50; /* ボタンの色 */
-    color: white;
-    padding: 15px 30px;
-    border: none;
-    border-radius: 30px;
-    font-size: 1.8vw;
+    width: 30px;
+    height: 30px;
+    background-size: contain;
+    animation-timing-function: linear;
+    animation: star-fall-wave 3s linear forwards;
     cursor: pointer;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
-    z-index: 2;
-    margin-top: 20px;
 }
 
-.game-button:hover {
-    background-color: #5cb85c;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+.star.normal {
+    background-image: url('star_normal.PNG');
 }
 
-.game-button.small-button {
-    padding: 10px 20px;
-    font-size: 1.2vw;
-    position: absolute; /* プレイ画面での配置調整 */
-    top: 20px;
-    left: 20px;
+.star.rainbow {
+    background-image: url('star_rainbow.PNG');
 }
 
-/* プレイ画面のスタイル */
-#play-screen {
-    /* 必要に応じて調整 */
+.star.diamond {
+    background-image: url('diamond.PNG');
 }
 
-.play-area {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end; /* アライグマを下部に配置 */
-    padding-bottom: 10%; /* アライグマの足元にスペース */
+@keyframes star-fall-wave {
+    0% { transform: translate(0, -10vh); opacity: 1; }
+    100% { transform: translate(100px, 110vh); opacity: 0.5; }
 }
 
-.kokoperi-play-image {
+#ui-overlay {
     position: absolute;
-    top: 5%;
-    width: 25%; /* 小さめに表示 */
-    max-width: 180px;
-    filter: drop-shadow(0 0 8px rgba(0, 200, 255, 0.4));
-    animation: floatAndGlow 4s ease-in-out infinite alternate;
-}
-
-.raccoon-player-image {
-    width: 20%; /* プレイヤーのアライグマサイズ */
-    max-width: 150px;
-    position: absolute;
-    bottom: 5%; /* 画面下部に配置 */
-    transition: left 0.1s linear; /* アライグマ移動用 */
-    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
-}
-
-#stars-drop-zone {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none; /* 星を透過させる */
-}
-
-.score-display {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    color: white;
-    font-size: 2vw;
-    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     z-index: 10;
 }
 
-/* クリア画面のスタイル */
-#clear-screen {
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+button {
+    font-size: 2em;
+    padding: 10px 20px;
+    cursor: pointer;
 }
 
-.clear-content {
-    background-color: rgba(0, 0, 0, 0.7); /* 半透明の背景 */
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-    color: white;
-    max-width: 80%;
-    z-index: 1;
+.hidden {
+    display: none;
 }
-
-#clear-screen h2 {
-    color: #00FFFF;
-    font-size: 3.5vw;
-    margin-bottom: 15px;
-}
-
-#clear-screen h3 {
-    color: #ADD8E6;
-    font-size: 2.5vw;
-    margin-bottom: 10px;
-}
-
-#indian-teachings-content {
-    margin-bottom: 30px;
-}
-
-.teaching-text {
-    font-size: 1.5vw;
-    line-height: 1.6;
-    margin-bottom: 20px;
-}
-
-.teaching-illustration {
-    max-width: 80%;
-    height: auto;
-    border-radius: 10px;
-    margin-top: 15px;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-}
-
-/* ボタンの横並び */
-#clear-screen .game-button {
-    margin: 0 10px;
-}
-
-
-/* レスポンシブデザインの調整 */
-@media (max-width: 768px) {
-    .game-title-text { font-size: 9vw; }
-    .game-subtitle-text { font-size: 4vw; margin-bottom: 20px;}
-    .game-button { padding: 12px 25px; font-size: 4vw; margin-top: 15px;}
-    .game-button.small-button { padding: 8px 15px; font-size: 3vw; top: 10px; left: 10px;}
-    .kokoperi-image { top: 10%; width: 50%;}
-    .raccoon-image { bottom: 20%; width: 35%;}
-    .score-display { font-size: 4vw; top: 10px; right: 10px;}
-    #clear-screen h2 { font-size: 6vw; }
-    #clear-screen h3 { font-size: 4.5vw; }
-    .teaching-text { font-size: 3.5vw; }
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-    // 各画面要素を取得
-    const titleScreen = document.getElementById('title-screen');
-    const playScreen = document.getElementById('play-screen');
-    const clearScreen = document.getElementById('clear-screen');
-
-    // ボタン要素を取得
-    const startGameButton = document.getElementById('start-game-button');
-    const pauseButton = document.getElementById('pause-button'); // 将来的に使う
-    const backToTitleButton = document.getElementById('back-to-title-button');
-    const nextTeachingButton = document.getElementById('next-teaching-button'); // 将来的に使う
-
-    // スコア表示要素
-    const currentScoreElement = document.getElementById('current-score');
+    const gameScreen = document.getElementById('game-screen');
+    const startButton = document.getElementById('start-button');
+    const nextStageButton = document.getElementById('next-stage-button');
+    const restartButton = document.getElementById('restart-button');
+    const resultMessage = document.getElementById('result-message');
+    const bgm = document.getElementById('bgm');
+    let currentStage = 0;
     let score = 0;
-
-    // プレイヤー（アライグマ）要素
-    const raccoonPlayer = document.querySelector('.raccoon-player-image');
-    const starsDropZone = document.getElementById('stars-drop-zone');
-
-    // --- 画面遷移関数 ---
-    function showScreen(screenToShow) {
-        // すべての画面を非表示にする
-        document.querySelectorAll('.game-screen').forEach(screen => {
-            screen.classList.remove('active');
-            screen.classList.add('hidden');
-        });
-        // 指定された画面を表示する
-        screenToShow.classList.remove('hidden');
-        screenToShow.classList.add('active');
-    }
-
-    // --- イベントリスナー ---
-    startGameButton.addEventListener('click', () => {
-        showScreen(playScreen);
-        initGamePlay(); // ゲームプレイの初期化を開始
-    });
-
-    backToTitleButton.addEventListener('click', () => {
-        showScreen(titleScreen);
-        // ゲームの状態をリセットする処理があればここに
-    });
-
-    // --- ゲームプレイロジック（骨格のみ） ---
-    let gameInterval; // 星を落とすインターバル
-    let raccoonPosition = 50; // アライグマの初期位置（中央50%）
-
-    function initGamePlay() {
-        score = 0;
-        currentScoreElement.textContent = score;
-        raccoonPlayer.style.left = '50%'; // アライグマを中央にリセット
-
-        // 古い星をすべてクリア
-        starsDropZone.innerHTML = '';
-
-        // 星を落とす処理を開始 (例: 1秒ごとに新しい星を生成)
-        gameInterval = setInterval(createFallingStar, 1000);
-
-        // アライグマの移動処理（PC:マウス、スマホ:タッチ）
-        starsDropZone.addEventListener('mousemove', moveRaccoonDesktop);
-        starsDropZone.addEventListener('touchmove', moveRaccoonMobile);
-    }
-
-    // アライグマの移動処理（デスクトップ）
-    function moveRaccoonDesktop(event) {
-        const playAreaWidth = starsDropZone.offsetWidth;
-        const newX = event.clientX - starsDropZone.getBoundingClientRect().left; // starsDropZone内でのX座標
-        const raccoonWidth = raccoonPlayer.offsetWidth;
-        raccoonPlayer.style.left = (newX - raccoonWidth / 2) + 'px'; // マウスの位置にアライグマの中心を合わせる
-    }
-
-    // アライグマの移動処理（モバイル）
-    function moveRaccoonMobile(event) {
-        if (event.touches.length > 0) {
-            const playAreaWidth = starsDropZone.offsetWidth;
-            const newX = event.touches[0].clientX - starsDropZone.getBoundingClientRect().left;
-            const raccoonWidth = raccoonPlayer.offsetWidth;
-            raccoonPlayer.style.left = (newX - raccoonWidth / 2) + 'px';
-            event.preventDefault(); // スクロールを防ぐ
-        }
-    }
-
-
-    // 星を生成する関数
-    function createFallingStar() {
-        const star = document.createElement('div');
-        star.classList.add('falling-star-play'); // プレイ画面用の星のクラス
-        star.style.left = Math.random() * 90 + 5 + '%'; // 左右にランダムに生成 (5%～95%)
-        starsDropZone.appendChild(star);
-
-        // 星が落ちるアニメーション (CSSで定義)
-        // 衝突判定はJavaScriptで行う
-
-        // 星が画面外に出る、またはキャッチされた時の処理
-        star.addEventListener('animationend', () => {
-            star.remove();
-            // キャッチされずに画面外に出た場合の処理（例: ライフ減少など）
-        });
-
-        // 衝突判定 (簡単な例)
-        // ここにアライグマと星の衝突判定ロジックを実装
-        // 星がアライグマに当たったらスコアを増やし、星を消す
-        // setIntervalを回して定期的にチェックするか、星のアニメーション中に位置をチェック
-        const starInterval = setInterval(() => {
-            const starRect = star.getBoundingClientRect();
-            const raccoonRect = raccoonPlayer.getBoundingClientRect();
-
-            if (
-                starRect.bottom >= raccoonRect.top &&
-                starRect.top <= raccoonRect.bottom &&
-                starRect.right >= raccoonRect.left &&
-                starRect.left <= raccoonRect.right
-            ) {
-                // 衝突！
-                clearInterval(starInterval); // 判定を停止
-                star.remove(); // 星を消す
-                score++;
-                currentScoreElement.textContent = score;
-                // ここで「シャリーン」音を鳴らす
-                playSound('catch'); // サウンド関数を呼び出す
-            }
-            // 星が画面下部に到達したら判定停止
-            if (starRect.top > window.innerHeight) {
-                clearInterval(starInterval);
-                star.remove(); // キャッチされなかった星を消す
-            }
-
-        }, 50); // 50msごとに判定
-
-    }
-
-    // --- サウンドロジック（骨格のみ） ---
-    // ゲーム内で使う音を事前に読み込む
-    const sounds = {
-        pop: new Audio('sounds/pop.mp3'), // ポクポク音
-        catch: new Audio('sounds/shaleen.mp3'), // シャリーン音
-        // 他にもBGMなど
+    
+    const starSounds = {
+        normal: new Audio('star_pop.mp3'),
+        rainbow: new Audio('star_pop_rainbow.mp3'),
+        diamond: new Audio('star_pop.mp3') // ダイヤモンド星の効果音をアップロードしたら変更してください
     };
 
-    function playSound(soundName) {
-        if (sounds[soundName]) {
-            sounds[soundName].currentTime = 0; // 再生位置を最初に戻す
-            sounds[soundName].play().catch(e => console.log("Sound play error:", e));
+    const indianQuotes = [
+        "ラムビー族の格言\n知識ではなく、智恵を求めよ。知識は産物だが、\n智恵は未来をもたらす。",
+        "チェロキー族の格言\n日と夜、季節、星、太陽。その移ろいを見れば、\nひとより偉大な何かの存在を思わずにはいられない。",
+        "ショショネ族の格言\n自分より偉大なものには、つねに畏敬の念をもて。",
+        "ホピ族の格言\n善人にも、悪人にも雨は降り、陽は昇る。",
+        "ラコタ族の格言\n創世記はいまも続いている。",
+        "アパッチ族の格言\nまっすぐに、しゃべれば、光線のように、こころに届く",
+        "ホピ族の格言\nかんしゃくを起こすと、友人を失う。嘘をつくと、自分自身を失う。",
+        "オハマ族の伝承\n親切とは、言葉をつつしみ、人を傷つけないように心がけることだ。",
+        "ホピ族の格言\n慎ましく食べ、慎んでしゃべる。そして誰も傷つけない。",
+        "ソーク族の格言\n私の前を歩くな、私が従うとは限らない。私の後を歩くな、\n私が導くとは限らない。私と共に歩け、私たちはひとつなのだから。",
+        "ミンカス族の格言\n感謝する理由がみつからなければ落ち度はあなた自身にある。",
+        "ダコタ族の格言\n歩いた足跡でひとは永遠に知られる。",
+        "ナバホ族の格言\n思考は矢のように放たれたら、的を射る。注意しないと\n自分の放った矢で倒れることになる。",
+        "ホピ族の格言\n怒りは自分に盛る毒。",
+        "ドゥワミッシュ族の格言\n死は存在しない生きる世界が変わるだけだ。",
+        "シャイアン族の格言\n目で判断せずに、こころで判断しろ。",
+        "オマハ族の格言\n過ちを見てそれを正そうとしなければ過ちを犯した者と同罪だ。",
+        "ナバホ族\n素晴らしい夢を見てそれを行動に移せ。",
+        "チェロキー族の格言\n昨日のことで今日を消耗させてはならない。",
+        "オノンダガ族\n秘密などというものはない。謎などというものもない。それらはただの常識にすぎない。",
+        "ホピ族の格言\n泣くことをおそれずに。泣くことは、悲しみにあふれたあなたのこころを解き放つ。",
+        "オグララ・ラコタ族の格言\n真実の言葉とは、深くこころに沈んでそこにとどまるもの。",
+        "オクラホマ族の格言\n飢えた人間は狼と一緒でも食べる。",
+        "ホピ族の格言\n1本の指では小石すら持ち上げられぬ。",
+        "アパッチ族の格言\n見た目のよい男というものが、ただ顔の造作がよいだけのこともある。",
+        "オグララ・ラコタ族の格言\n宇宙はわれわれひちりひとりのなかにある。",
+        "ラコタ族の格言\n貧乏は謙遜の首を縄で絞めながら、神と人間にたいする無礼を飼育する。",
+        "モホーク族の格言\n人生はあげることと、もらうことの両方である。",
+        "パウニー族の格言\n宗教はひとつのこらず神のもとに帰るための足がかりにすぎない。",
+        "オマハ族の格言\nいのちあるものすべてにいたわりを。",
+        "ドゥワミッシュ族の格言\nわたしが愛するのは、お金への愛に生きていない人たち。",
+        "アラバホ族の格言\nあぶく銭は怠け者をつくる。",
+        "ソーク族の格言\n師は教えることでまた学んでいる。",
+        "ダコタ族の格言\n歩いた足跡でひとは永遠に知られる。",
+        "アパッチ族の格言\n神の名は無意味、世界にとってほんとうの神はあいなのだ。",
+        "アラバホ族の格言\n少しずつ少しずつ行けるところまで進む。",
+        "ポウニー族の格言\n死はつねに季節はずれにやってくる。",
+        "ナバホ族の格言\n素晴らしい夢を見てそれを行動に移せ。",
+        "スー族の格言\nひとびとのこころに真の平和が宿るまで、国と国との間に平和はやってこない。",
+        "イロコイ族の格言\nどんなことも7世代先まで考えて決めなければならない。"
+    ];
+
+    const starPoints = {
+        'normal': 1,
+        'rainbow': 2,
+        'diamond': 5
+    };
+
+    const stageConfig = {
+        1: {
+            stars: 30,
+            ratios: { normal: 0.9, rainbow: 0.1, diamond: 0 },
+            clearScore: 30
+        },
+        2: {
+            stars: 30,
+            ratios: { normal: 0.5, rainbow: 0.5, diamond: 0 },
+            clearScore: 40
+        },
+        3: {
+            stars: 30,
+            ratios: { normal: 0.2, rainbow: 0.7, diamond: 0.1 },
+            clearScore: 60
         }
+    };
+
+    startButton.addEventListener('click', () => {
+        bgm.play();
+        startStage(1);
+    });
+
+    nextStageButton.addEventListener('click', () => {
+        startStage(currentStage + 1);
+    });
+
+    restartButton.addEventListener('click', () => {
+        bgm.pause();
+        bgm.currentTime = 0;
+        startStage(1);
+    });
+
+    function startStage(stageNumber) {
+        currentStage = stageNumber;
+        score = 0;
+        gameScreen.innerHTML = '';
+        resultMessage.textContent = '';
+        startButton.classList.add('hidden');
+        nextStageButton.classList.add('hidden');
+        restartButton.classList.add('hidden');
+
+        const config = stageConfig[stageNumber];
+        const starPool = createStarPool(config.stars, config.ratios);
+
+        let starCount = 0;
+        const starInterval = setInterval(() => {
+            if (starCount >= config.stars) {
+                clearInterval(starInterval);
+                checkResult();
+                return;
+            }
+            createStar(starPool[starCount]);
+            starCount++;
+        }, 1000);
     }
 
-    // 初期表示はタイトル画面
-    showScreen(titleScreen);
+    function createStarPool(totalStars, ratios) {
+        const pool = [];
+        const normalCount = Math.floor(totalStars * ratios.normal);
+        const rainbowCount = Math.floor(totalStars * ratios.rainbow);
+        const diamondCount = totalStars - normalCount - rainbowCount;
 
-    // --- プレイ画面での星のCSSアニメーション（追加） ---
-    // style.cssにも .falling-star-play のアニメーションを追加してください
-    // @keyframes starFallPlay { ... }
-    // 例えば、より速く、下に落ちるように調整
+        for (let i = 0; i < normalCount; i++) pool.push('normal');
+        for (let i = 0; i < rainbowCount; i++) pool.push('rainbow');
+        for (let i = 0; i < diamondCount; i++) pool.push('diamond');
 
-    // サンプルとして、プレイ画面の星のアニメーションも追加
-    const styleSheet = document.styleSheets[0];
-    const playStarKeyframes = `
-        @keyframes starFallPlay {
-            0% { transform: translateY(-50px) scale(0.5); opacity: 0; }
-            10% { opacity: 1; }
-            90% { transform: translateY(calc(100vh - 50px)) scale(1); opacity: 1; }
-            100% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+        return shuffleArray(pool);
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
         }
-    `;
-    styleSheet.insertRule(playStarKeyframes, styleSheet.cssRules.length);
+        return array;
+    }
 
-    const playStarRule = `
-        .falling-star-play {
-            position: absolute;
-            background-color: #FFF;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #FFD700, 0 0 15px #FFD700; /* 金色の輝き */
-            width: 12px;
-            height: 12px;
-            animation: starFallPlay 2s linear forwards; /* 落ちる速度調整 */
-            pointer-events: none; /* クリック不可 */
+    function createStar(starType) {
+        const star = document.createElement('div');
+        star.classList.add('star', starType);
+        star.style.left = `${Math.random() * 90}vw`;
+        gameScreen.appendChild(star);
+
+        star.addEventListener('click', () => {
+            const sound = starSounds[starType];
+            if (sound) {
+                sound.play();
+            }
+            score += starPoints[starType];
+            star.remove();
+        });
+    }
+
+    function checkResult() {
+        const requiredScore = stageConfig[currentStage].clearScore;
+
+        if (score >= requiredScore) {
+            if (currentStage < 3) {
+                resultMessage.textContent = "ステージクリア！";
+                nextStageButton.classList.remove('hidden');
+            } else {
+                resultMessage.textContent = "ゲームクリア！";
+                restartButton.classList.remove('hidden');
+            }
+        } else {
+            const randomQuote = indianQuotes[Math.floor(Math.random() * indianQuotes.length)];
+            resultMessage.textContent = randomQuote;
+            restartButton.classList.remove('hidden');
         }
-    `;
-    styleSheet.insertRule(playStarRule, styleSheet.cssRules.length);
-
-
-    // ゲームクリア条件 (仮)
-    // スコアが10点になったらクリア画面へ遷移
-    setInterval(() => {
-        if (score >= 10 && !clearScreen.classList.contains('active')) {
-            clearInterval(gameInterval); // 星の生成を停止
-            starsDropZone.innerHTML = ''; // 残っている星を消す
-            showScreen(clearScreen);
-            // 他のゲームリソースもクリーンアップ
-        }
-    }, 1000);
-
-
-    // ココペリの笛の音の制御 (仮)
-    // プレイ画面で星が生成されるたびに「ポクポク」音を鳴らす
-    // 実際には、ココペリが笛を吹くアニメーションと同期させる
-    setInterval(() => {
-        if (playScreen.classList.contains('active')) {
-            playSound('pop');
-        }
-    }, 1000); // 1秒ごとにポクポク音（星の生成と同期）
-
+    }
 });
