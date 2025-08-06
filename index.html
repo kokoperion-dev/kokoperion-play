@@ -26,12 +26,12 @@
       left: 5%;
       width: 80px;
       z-index: 10;
-      animation: float 4s ease-in-out infinite alternate;
+      animation: float 5s ease-in-out infinite alternate;
       filter: drop-shadow(0 0 10px rgba(255,255,200,0.5));
     }
     @keyframes float {
-      0%, 100% { transform: translateY(0) rotate(-5deg); }
-      50% { transform: translateY(-15px) rotate(5deg); }
+      0%, 100% { transform: translateY(0) rotate(-3deg); }
+      50% { transform: translateY(-10px) rotate(3deg); }
     }
     #raccoon {
       position: absolute;
@@ -52,10 +52,10 @@
       width: 30px;
       height: 30px;
       animation: 
-        drop 5s linear forwards,
-        sway 3s ease-in-out infinite;
+        drop 6s linear forwards,
+        sway 4s ease-in-out infinite;
       opacity: 0;
-      transition: opacity 0.5s ease-out;
+      transition: opacity 0.8s ease-out;
       z-index: 10;
       pointer-events: auto;
       filter: drop-shadow(0 0 5px rgba(255,255,255,0.8));
@@ -66,24 +66,24 @@
     .star.rainbow {
       width: 40px;
       height: 40px;
-      animation-duration: 4.5s, 2.5s;
+      animation-duration: 5.5s, 3.5s;
       filter: drop-shadow(0 0 10px rgba(255,100,255,0.6));
     }
     .star.diamond {
       width: 35px;
       height: 35px;
-      animation-duration: 4s, 2s;
+      animation-duration: 5s, 3s;
       filter: drop-shadow(0 0 15px rgba(100,255,255,0.7));
     }
     @keyframes drop {
       from { top: -50px; opacity: 0; }
-      10% { opacity: 0.8; }
+      15% { opacity: 0.9; }
       to { top: 100vh; }
     }
     @keyframes sway {
       0%, 100% { transform: translateX(0) rotate(0deg); }
-      25% { transform: translateX(20px) rotate(5deg); }
-      75% { transform: translateX(-20px) rotate(-5deg); }
+      25% { transform: translateX(12px) rotate(2deg); }
+      75% { transform: translateX(-12px) rotate(-2deg); }
     }
     /* その他のスタイルは変更なし */
   </style>
@@ -92,10 +92,10 @@
   <!-- HTML構造は変更なし -->
 
   <script>
-    // ゲーム設定を調整（星の出現間隔を短く）
+    // ゲーム設定を調整（星の出現間隔を少し長めに）
     const stages = [
       { 
-        dropInterval: 1800,  // 2.5秒→1.8秒
+        dropInterval: 2200,  // 1.8秒→2.2秒
         goal: 15,
         starTypes: [
           { type: 'normal', prob: 0.7, score: 1, sound: 'sound-catch' },
@@ -103,7 +103,7 @@
         ]
       },
       { 
-        dropInterval: 1500,  // 2秒→1.5秒
+        dropInterval: 1800,  // 1.5秒→1.8秒
         goal: 25,
         starTypes: [
           { type: 'normal', prob: 0.6, score: 1, sound: 'sound-catch' },
@@ -112,7 +112,7 @@
         ]
       },
       { 
-        dropInterval: 1200,  // 1.5秒→1.2秒
+        dropInterval: 1500,  // 1.2秒→1.5秒
         goal: 35,
         starTypes: [
           { type: 'normal', prob: 0.5, score: 1, sound: 'sound-catch' },
@@ -137,9 +137,9 @@
       
       // アニメーション設定を調整
       const startX = Math.random() * (window.innerWidth - 50);
-      const swayAmount = 25 + Math.random() * 25;  // 揺れ幅を大きく
-      const dropDuration = 4000 + Math.random() * 1000;  // 4-5秒
-      const swayDuration = 2000 + Math.random() * 1000;  // 2-3秒
+      const swayAmount = 15 + Math.random() * 15;  // 揺れ幅を小さく(12-30px)
+      const dropDuration = 5500 + Math.random() * 1000;  // 5.5-6.5秒
+      const swayDuration = 3500 + Math.random() * 1000;  // 3.5-4.5秒
       
       star.style.cssText = `
         left: ${startX}px;
@@ -149,13 +149,13 @@
         --sway-amount: ${swayAmount}px;
       `;
       
-      // クリック/タップイベント（即時反応）
+      // クリック/タップイベント
       star.addEventListener('click', function() {
         updateScore(parseInt(this.dataset.score));
         playSound(document.getElementById(this.dataset.sound));
-        this.style.transition = 'opacity 0.2s ease-out';
+        this.style.transition = 'opacity 0.3s ease-out';
         this.style.opacity = '0';
-        setTimeout(() => this.remove(), 200);
+        setTimeout(() => this.remove(), 300);
       });
       
       area.appendChild(star);
