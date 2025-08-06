@@ -18,10 +18,10 @@
       height: 100vh;
       background-image: url('background.PNG');
       background-size: cover;
-      background-position: center bottom; /* 背景を下に配置 */
+      background-position: center bottom;
       display: flex;
       flex-direction: column;
-      justify-content: flex-end; /* コンテンツを下部に */
+      justify-content: flex-end;
     }
     #kokopelli {
       position: absolute;
@@ -37,11 +37,11 @@
       100% { transform: translateX(-20px); }
     }
     #raccoon {
-      position: relative; /* relativeに変更 */
+      position: relative;
       width: 120px;
       z-index: 10;
-      margin-bottom: 10vh; /* 下からの余白 */
-      align-self: center; /* 中央寄せ */
+      margin-bottom: 10vh;
+      align-self: center;
     }
     .star {
       position: absolute;
@@ -52,8 +52,8 @@
         rotate 8000ms linear infinite;
       opacity: 0;
       transition: opacity 0.5s;
-      filter: drop-shadow(0 0 5px rgba(255,255,255,0.7)); /* 光のエフェクト */
-      will-change: transform; /* アニメーション最適化 */
+      filter: drop-shadow(0 0 5px rgba(255,255,255,0.7));
+      will-change: transform;
     }
     .star.rainbow {
       width: 45px;
@@ -127,15 +127,33 @@
       border-radius: 20px;
       cursor: pointer;
     }
+    .wisdom-quote {
+      font-style: italic;
+      margin: 20px 0;
+      padding: 15px;
+      background: rgba(255,255,255,0.1);
+      border-left: 3px solid #8B4513;
+      max-width: 80%;
+      animation: fadeIn 2s ease-out;
+    }
+    .wisdom-source {
+      text-align: right;
+      margin-top: 10px;
+      color: #D2B48C;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
   <div id="game-area">
-    <img id="kokopelli" src="kokopelli.PNG" />
+    <img id="kokopelli" src="kokopelli.png" onerror="this.src='kokopelli.PNG'" />
     <div id="score-display">スコア: <span id="score">0</span></div>
     <div id="timer-display">残り: <span id="timer">30</span>秒</div>
     <div id="stage-display">ステージ: <span id="stage">1</span></div>
-    <img id="raccoon" src="raccoon.PNG" />
+    <img id="raccoon" src="raccoon.png" onerror="this.src='raccoon.PNG'" />
   </div>
 
   <div id="message-overlay">
@@ -181,6 +199,37 @@
       }
     ];
 
+    const nativeWisdom = [
+      {
+        quote: "私たちは地球から借りているものを、未来の世代から借りているのだ。",
+        source: "ネイティブアメリカンの教え"
+      },
+      {
+        quote: "すべての生き物はつながっている。起こることはすべてつながりの中でのことだ。",
+        source: "チーフ・シアトル"
+      },
+      {
+        quote: "自然と調和して生きよ。自然はあなたの一部なのだから。",
+        source: "ホピ族の教え"
+      },
+      {
+        quote: "星を見上げなさい。彼らはあなたの祖先の目なのだから。",
+        source: "ラコタ族の言葉"
+      },
+      {
+        quote: "歩むたびに大地に感謝せよ。それはあなたの母なる大地なのだから。",
+        source: "ネイティブアメリカンの教え"
+      },
+      {
+        quote: "急ぐ者は道に迷い、ゆっくり歩む者は目的地にたどり着く。",
+        source: "ナバホ族の格言"
+      },
+      {
+        quote: "風の声に耳を傾けなさい。それは先祖からのメッセージだ。",
+        source: "チェロキー族の教え"
+      }
+    ];
+
     let stage = 0, score = 0, time = 30, interval, timer, running = false;
 
     const raccoon = document.getElementById('raccoon');
@@ -212,20 +261,37 @@
       return currentStage.starTypes[0];
     }
 
+    function getRandomWisdom() {
+      return nativeWisdom[Math.floor(Math.random() * nativeWisdom.length)];
+    }
+
     function spawnStar() {
       const s = document.createElement('img');
       const starType = getRandomStarType();
       
-      s.src = `${starType.type}_star.PNG`;
+      // 画像読み込み（小文字優先→大文字フォールバック）
+      const baseName = `${starType.type}_star`;
+      s.src = `${baseName}.png`;
+      s.onerror = function() {
+        this.src = `${baseName}.PNG`;
+        this.onerror = null;
+      };
+      
       s.className = `star visible ${starType.type}`;
+      s.alt = `${starType.type} star`;
       
       const swayAmplitude = 80 + Math.random() * 70;
-      s.style.setProperty('--sway-amplitude', `${swayAmplitude}px`);
-      s.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+      s.style.cssText = `
+        left: ${Math.random() * (window.innerWidth - 50)}px;
+        --sway-amplitude: ${swayAmplitude}px;
+        animation: 
+          drop 4000ms linear forwards,
+          sway 3000ms ease-in-out infinite;
+      `;
       
       area.appendChild(s);
       pop.currentTime = 0;
-      pop.play();
+      pop.play().catch(e => console.error('Sound error:', e));
       
       const check = setInterval(() => {
         const sr = s.getBoundingClientRect();
@@ -266,17 +332,32 @@
       clearInterval(interval);
       clearInterval(timer);
       running = false;
+      
       if (score >= stages[stage].goal) {
         clearBgm.currentTime = 0;
         clearBgm.play();
-        messageContent.innerHTML = `<h2>ステージ${stage + 1}クリア！</h2><p>${score}ポイント獲得！</p>`;
+        messageContent.innerHTML = `
+          <h2>ステージ${stage + 1}クリア！</h2>
+          <p>${score}ポイント獲得！</p>
+        `;
         nextButton.style.display = stage < 2 ? 'inline-block' : 'none';
       } else {
         failBgm.currentTime = 0;
         failBgm.play();
-        messageContent.innerHTML = `<h2>ステージ${stage + 1}失敗…</h2><p>目標スコア: ${stages[stage].goal}</p><p>獲得スコア: ${score}</p>`;
+        const wisdom = getRandomWisdom();
+        messageContent.innerHTML = `
+          <h2>ステージ${stage + 1}失敗…</h2>
+          <p>目標スコア: ${stages[stage].goal}</p>
+          <p>獲得スコア: ${score}</p>
+          <div class="wisdom-quote">
+            "${wisdom.quote}"
+            <div class="wisdom-source">- ${wisdom.source} -</div>
+          </div>
+          <p>もう一度挑戦しましょう</p>
+        `;
         nextButton.style.display = 'none';
       }
+      
       retryButton.style.display = 'inline-block';
       message.style.display = 'flex';
     }
