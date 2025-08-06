@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const starSounds = {
         normal: new Audio('star_pop.mp3'),
         rainbow: new Audio('star_pop_rainbow.mp3'),
-        diamond: new Audio('star_diamond_catch.mp3')
+        diamond: new Audio('star_pop.mp3') 
     };
 
     const starPoints = {
