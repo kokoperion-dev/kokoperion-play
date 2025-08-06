@@ -17,7 +17,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('background.png');
+    background-image: url('background.PNG');
     background-size: cover;
     z-index: -1;
 }
@@ -59,13 +59,13 @@ body {
     cursor: pointer;
 }
 .star.normal {
-    background-image: url('star_normal.png');
+    background-image: url('star_normal.PNG');
 }
 .star.rainbow {
-    background-image: url('star_rainbow.png');
+    background-image: url('star_rainbow.PNG');
 }
 .star.diamond {
-    background-image: url('diamond.png');
+    background-image: url('diamond.PNG');
 }
 @keyframes star-fall-wave {
     0% { transform: translate(0, -10vh); opacity: 1; }
