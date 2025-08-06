@@ -8,20 +8,17 @@
     body {
       margin: 0;
       padding: 0;
-      background: black;
+      background: #000;
       overflow: hidden;
-      font-family: sans-serif;
+      font-family: 'Arial', sans-serif;
+      touch-action: manipulation;
     }
     #game-area {
       position: relative;
       width: 100vw;
       height: 100vh;
-      background-image: url('background.PNG');
-      background-size: cover;
-      background-position: center bottom;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
+      background: url('background.png') no-repeat center bottom/cover;
+      overflow: hidden;
     }
     #kokopelli {
       position: absolute;
@@ -32,57 +29,55 @@
       animation: float 3s ease-in-out infinite alternate;
     }
     @keyframes float {
-      0% { transform: translateX(0); }
-      50% { transform: translateX(20px); }
-      100% { transform: translateX(-20px); }
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-10px) rotate(2deg); }
     }
     #raccoon {
-      position: relative;
+      position: absolute;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
       width: 120px;
-      z-index: 10;
-      margin-bottom: 10vh;
-      align-self: center;
+      z-index: 15;
+      pointer-events: none; /* アライグマをクリック不可に */
     }
     .star {
       position: absolute;
       width: 40px;
+      height: 40px;
       animation: 
-        drop 4000ms ease-in infinite,
-        sway 3000ms ease-in-out infinite,
-        rotate 8000ms linear infinite;
+        drop 4s linear forwards,
+        sway 3s ease-in-out infinite,
+        rotate 8s linear infinite;
       opacity: 0;
-      transition: opacity 0.5s;
+      transition: opacity 0.3s;
+      z-index: 10;
+      cursor: pointer;
+      transform-origin: center;
       filter: drop-shadow(0 0 5px rgba(255,255,255,0.7));
-      will-change: transform;
-    }
-    .star.rainbow {
-      width: 45px;
-      filter: drop-shadow(0 0 8px rgba(255,0,255,0.7));
-    }
-    .star.diamond {
-      width: 35px;
-      filter: drop-shadow(0 0 10px rgba(0,255,255,0.9));
     }
     .star.visible {
       opacity: 1;
     }
+    .star.rainbow {
+      width: 45px;
+      height: 45px;
+      filter: drop-shadow(0 0 8px rgba(255,0,255,0.7));
+    }
+    .star.diamond {
+      width: 35px;
+      height: 35px;
+      filter: drop-shadow(0 0 10px rgba(0,255,255,0.9));
+    }
     @keyframes drop {
-      from { 
-        transform: translateY(-100px);
-        opacity: 0;
-      }
-      10% {
-        opacity: 1;
-      }
-      to { 
-        transform: translateY(calc(100vh + 100px));
-      }
+      from { top: -50px; opacity: 0; }
+      10% { opacity: 1; }
+      to { top: 100vh; }
     }
     @keyframes sway {
       0%, 100% { transform: translateX(0) rotate(0deg); }
-      25% { transform: translateX(calc(var(--sway-amplitude) * 0.3)) rotate(2deg); }
-      50% { transform: translateX(0) rotate(0deg); }
-      75% { transform: translateX(calc(var(--sway-amplitude) * -0.3)) rotate(-2deg); }
+      25% { transform: translateX(15px) rotate(2deg); }
+      75% { transform: translateX(-15px) rotate(-2deg); }
     }
     @keyframes rotate {
       0% { transform: rotate(0deg); }
@@ -93,12 +88,14 @@
       color: white;
       font-size: 20px;
       z-index: 20;
-      text-shadow: 0 0 5px black;
+      text-shadow: 0 0 5px #000;
+      padding: 5px 10px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 10px;
     }
     #score-display { top: 10px; right: 10px; }
     #timer-display { top: 10px; right: 150px; }
     #stage-display { top: 10px; left: 10px; }
-
     #message-overlay {
       position: absolute;
       top: 0; left: 0;
@@ -113,20 +110,6 @@
       text-align: center;
       padding: 20px;
     }
-    #message-overlay img {
-      width: 150px;
-      margin: 20px 0;
-    }
-    #message-overlay button {
-      font-size: 18px;
-      padding: 10px 20px;
-      margin-top: 20px;
-      background: linear-gradient(to bottom, #4a6da7, #2a4a7a);
-      color: white;
-      border: none;
-      border-radius: 20px;
-      cursor: pointer;
-    }
     .wisdom-quote {
       font-style: italic;
       margin: 20px 0;
@@ -136,24 +119,38 @@
       max-width: 80%;
       animation: fadeIn 2s ease-out;
     }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
     .wisdom-source {
       text-align: right;
       margin-top: 10px;
       color: #D2B48C;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    #message-overlay button {
+      font-size: 18px;
+      padding: 10px 20px;
+      margin: 10px;
+      background: linear-gradient(to bottom, #4a6da7, #2a4a7a);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    #message-overlay button:hover {
+      transform: scale(1.05);
     }
   </style>
 </head>
 <body>
   <div id="game-area">
-    <img id="kokopelli" src="kokopelli.png" onerror="this.src='kokopelli.PNG'" />
+    <img id="kokopelli" src="kokopelli.png" onerror="this.src='kokopelli.PNG'" alt="ココペリ">
     <div id="score-display">スコア: <span id="score">0</span></div>
     <div id="timer-display">残り: <span id="timer">30</span>秒</div>
     <div id="stage-display">ステージ: <span id="stage">1</span></div>
-    <img id="raccoon" src="raccoon.png" onerror="this.src='raccoon.PNG'" />
+    <img id="raccoon" src="raccoon.png" onerror="this.src='raccoon.PNG'" alt="アライグマ">
   </div>
 
   <div id="message-overlay">
@@ -170,6 +167,7 @@
   <audio id="bgm-fail" src="fail_bgm.mp3"></audio>
 
   <script>
+    // ゲーム設定
     const stages = [
       { 
         dropInterval: 2000, 
@@ -199,6 +197,7 @@
       }
     ];
 
+    // ネイティブアメリカンの格言
     const nativeWisdom = [
       {
         quote: "私たちは地球から借りているものを、未来の世代から借りているのだ。",
@@ -230,10 +229,12 @@
       }
     ];
 
-    let stage = 0, score = 0, time = 30, interval, timer, running = false;
+    // ゲーム変数
+    let stage = 0, score = 0, time = 30;
+    let interval, timer, running = false;
 
+    // DOM要素
     const raccoon = document.getElementById('raccoon');
-    const kokopelli = document.getElementById('kokopelli');
     const area = document.getElementById('game-area');
     const scoreEl = document.getElementById('score');
     const timerEl = document.getElementById('timer');
@@ -242,10 +243,11 @@
     const messageContent = document.getElementById('message-content');
     const nextButton = document.getElementById('next-button');
     const retryButton = document.getElementById('retry-button');
-    const pop = document.getElementById('sound-pop');
+    const popSound = document.getElementById('sound-pop');
     const clearBgm = document.getElementById('bgm-clear');
     const failBgm = document.getElementById('bgm-fail');
 
+    // 星のタイプをランダムに選択
     function getRandomStarType() {
       const currentStage = stages[stage];
       const rand = Math.random();
@@ -257,62 +259,84 @@
           return starType;
         }
       }
-      
       return currentStage.starTypes[0];
     }
 
+    // ランダムな格言を取得
     function getRandomWisdom() {
       return nativeWisdom[Math.floor(Math.random() * nativeWisdom.length)];
     }
 
+    // 星を生成
     function spawnStar() {
-      const s = document.createElement('img');
+      const star = document.createElement('img');
       const starType = getRandomStarType();
+      const fileName = `${starType.type}_star.png`;
       
-      // 画像読み込み（小文字優先→大文字フォールバック）
-      const baseName = `${starType.type}_star`;
-      s.src = `${baseName}.png`;
-      s.onerror = function() {
-        this.src = `${baseName}.PNG`;
-        this.onerror = null;
-      };
+      star.src = fileName;
+      star.onerror = () => star.src = fileName.replace('.png', '.PNG');
       
-      s.className = `star visible ${starType.type}`;
-      s.alt = `${starType.type} star`;
+      star.className = `star visible ${starType.type}`;
+      star.dataset.score = starType.score;
+      star.dataset.sound = starType.sound;
       
-      const swayAmplitude = 80 + Math.random() * 70;
-      s.style.cssText = `
-        left: ${Math.random() * (window.innerWidth - 50)}px;
-        --sway-amplitude: ${swayAmplitude}px;
-        animation: 
-          drop 4000ms linear forwards,
-          sway 3000ms ease-in-out infinite;
-      `;
+      // アニメーション設定
+      const startX = Math.random() * (window.innerWidth - 50);
+      star.style.left = `${startX}px`;
+      star.style.setProperty('--sway-amount', `${20 + Math.random() * 30}px`);
       
-      area.appendChild(s);
-      pop.currentTime = 0;
-      pop.play().catch(e => console.error('Sound error:', e));
+      // クリック/タップイベント
+      star.addEventListener('click', handleStarClick);
       
-      const check = setInterval(() => {
-        const sr = s.getBoundingClientRect();
-        const rr = raccoon.getBoundingClientRect();
-        
-        if (sr.bottom >= rr.top && sr.left < rr.right && sr.right > rr.left) {
-          score += starType.score;
-          scoreEl.textContent = score;
-          const sound = document.getElementById(starType.sound);
-          sound.currentTime = 0;
-          sound.play();
-          s.remove();
-          clearInterval(check);
-        } else if (sr.top > window.innerHeight) {
-          s.remove();
-          clearInterval(check);
-        }
-      }, 50);
+      area.appendChild(star);
+      playSound(popSound);
     }
 
+    // 星をクリック/タップした時の処理
+    function handleStarClick(e) {
+      const star = e.target;
+      const score = parseInt(star.dataset.score);
+      const soundId = star.dataset.sound;
+      
+      // スコア更新
+      updateScore(score);
+      
+      // 効果音再生
+      playSound(document.getElementById(soundId));
+      
+      // 星を削除
+      star.remove();
+    }
+
+    // スコア更新
+    function updateScore(points) {
+      score += points;
+      scoreEl.textContent = score;
+      
+      // スコアアニメーション
+      scoreEl.style.transform = 'scale(1.2)';
+      setTimeout(() => scoreEl.style.transform = 'scale(1)', 300);
+    }
+
+    // 効果音再生
+    function playSound(sound) {
+      if (!sound) return;
+      sound.currentTime = 0;
+      sound.play().catch(e => console.log('音声再生エラー:', e));
+    }
+
+    // ゲーム開始
     function startStage() {
+      resetGame();
+      interval = setInterval(spawnStar, stages[stage].dropInterval);
+      timer = setInterval(updateTimer, 1000);
+    }
+
+    // ゲームリセット
+    function resetGame() {
+      // 既存の星を全て削除
+      document.querySelectorAll('.star').forEach(star => star.remove());
+      
       score = 0;
       time = 30;
       scoreEl.textContent = score;
@@ -320,30 +344,42 @@
       stageEl.textContent = stage + 1;
       message.style.display = 'none';
       running = true;
-      interval = setInterval(spawnStar, stages[stage].dropInterval);
-      timer = setInterval(() => {
-        time--;
-        timerEl.textContent = time;
-        if (time <= 0) endStage();
-      }, 1000);
     }
 
+    // タイマー更新
+    function updateTimer() {
+      time--;
+      timerEl.textContent = time;
+      
+      if (time <= 0) {
+        endStage();
+      }
+    }
+
+    // ステージ終了
     function endStage() {
       clearInterval(interval);
       clearInterval(timer);
       running = false;
       
       if (score >= stages[stage].goal) {
-        clearBgm.currentTime = 0;
-        clearBgm.play();
+        showResult(true);
+      } else {
+        showResult(false);
+      }
+    }
+
+    // 結果表示
+    function showResult(isSuccess) {
+      if (isSuccess) {
+        playSound(clearBgm);
         messageContent.innerHTML = `
           <h2>ステージ${stage + 1}クリア！</h2>
           <p>${score}ポイント獲得！</p>
         `;
-        nextButton.style.display = stage < 2 ? 'inline-block' : 'none';
+        nextButton.style.display = stage < stages.length - 1 ? 'block' : 'none';
       } else {
-        failBgm.currentTime = 0;
-        failBgm.play();
+        playSound(failBgm);
         const wisdom = getRandomWisdom();
         messageContent.innerHTML = `
           <h2>ステージ${stage + 1}失敗…</h2>
@@ -353,55 +389,83 @@
             "${wisdom.quote}"
             <div class="wisdom-source">- ${wisdom.source} -</div>
           </div>
-          <p>もう一度挑戦しましょう</p>
         `;
         nextButton.style.display = 'none';
       }
       
-      retryButton.style.display = 'inline-block';
+      retryButton.style.display = 'block';
       message.style.display = 'flex';
     }
 
-    nextButton.onclick = () => { stage++; startStage(); };
-    retryButton.onclick = () => { if (stage > 2) stage = 0; startStage(); };
+    // イベントリスナー
+    nextButton.addEventListener('click', () => {
+      stage++;
+      startStage();
+    });
 
-    // スマホスワイプ操作
-    let startX = null;
-    window.addEventListener('touchstart', e => {
-      startX = e.touches[0].clientX;
+    retryButton.addEventListener('click', () => {
+      if (stage >= stages.length) stage = 0;
+      startStage();
     });
-    
-    window.addEventListener('touchmove', e => {
-      if (!running || startX === null) return;
-      const deltaX = e.touches[0].clientX - startX;
-      const raccoonRect = raccoon.getBoundingClientRect();
+
+    // タッチ操作
+    let touchStartX = 0;
+    let raccoonStartX = 0;
+
+    raccoon.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      raccoonStartX = raccoon.offsetLeft;
+      e.preventDefault(); // タッチスクロールを防ぐ
+    }, { passive: false });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!running) return;
+      const touchX = e.touches[0].clientX;
+      const deltaX = touchX - touchStartX;
+      let newX = raccoonStartX + deltaX;
       
-      let newLeft = raccoon.offsetLeft + deltaX;
-      newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
+      // 画面端チェック
+      newX = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newX));
       
-      raccoon.style.left = newLeft + 'px';
-      startX = e.touches[0].clientX;
-    });
+      raccoon.style.left = `${newX}px`;
+      e.preventDefault();
+    }, { passive: false });
 
     // PC用マウス操作
     let isDragging = false;
-    raccoon.addEventListener('mousedown', () => {
+    let mouseStartX = 0;
+
+    raccoon.addEventListener('mousedown', (e) => {
       isDragging = true;
+      mouseStartX = e.clientX;
+      raccoonStartX = raccoon.offsetLeft;
     });
-    
+
     window.addEventListener('mousemove', (e) => {
       if (!isDragging || !running) return;
-      const raccoonRect = raccoon.getBoundingClientRect();
-      let newLeft = e.clientX - raccoonRect.width / 2;
-      newLeft = Math.max(0, Math.min(window.innerWidth - raccoonRect.width, newLeft));
-      raccoon.style.left = newLeft + 'px';
+      const deltaX = e.clientX - mouseStartX;
+      let newX = raccoonStartX + deltaX;
+      
+      newX = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newX));
+      raccoon.style.left = `${newX}px`;
     });
-    
+
     window.addEventListener('mouseup', () => {
       isDragging = false;
     });
 
-    window.onload = () => { stage = 0; startStage(); };
+    // ゲーム開始
+    window.addEventListener('load', () => {
+      // 画像フォールバック設定
+      document.getElementById('kokopelli').onerror = function() {
+        this.src = 'kokopelli.PNG';
+      };
+      document.getElementById('raccoon').onerror = function() {
+        this.src = 'raccoon.PNG';
+      };
+      
+      startStage();
+    });
   </script>
 </body>
 </html>
