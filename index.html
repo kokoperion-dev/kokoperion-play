@@ -1,8 +1,3 @@
-チャットGPT案
-
-<details>
-<summary>▼ HTMLコードを表示（クリック）</summary>
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -128,13 +123,11 @@
   <audio id="bgm-fail" src="fail_bgm.mp3"></audio>
 
   <script>
-
-const stages = [
-  { dropInterval: 2000, sway: false, speed: 4000, goal: 15, rainbow: 0.1, diamond: 0 },
-  { dropInterval: 1500, sway: true,  speed: 3500, goal: 40, rainbow: 0.4, diamond: 0.1 },
-  { dropInterval: 1000, sway: true,  speed: 3500, goal: 60, rainbow: 0.5, diamond: 0.4 }
-];
-
+    const stages = [
+      { dropInterval: 2000, sway: false, speed: 3000, goal: 20, rainbow: 0 },
+      { dropInterval: 1500, sway: true, speed: 3000, goal: 30, rainbow: 0 },
+      { dropInterval: 1000, sway: true, speed: 3000, goal: 40, rainbow: 0.3 }
+    ];
 
     let stage = 0, score = 0, time = 30, interval, timer, running = false;
 
@@ -170,71 +163,36 @@ const stages = [
       }, 1000);
     }
 
-
-function spawnStar() {
-  const s = document.createElement('img');
-
-  const r = Math.random();
-  const currentStage = stages[stage];
-  let starType = 'normal';
-  if (r < currentStage.diamond) {
-    starType = 'diamond';
-  } else if (r < currentStage.diamond + currentStage.rainbow) {
-    starType = 'rainbow';
-  }
-
-  if (starType === 'diamond') {
-    s.src = 'diamond.PNG';
-    s.dataset.point = 3;
-  } else if (starType === 'rainbow') {
-    s.src = 'star_rainbow.PNG';
-    s.dataset.point = 2;
-    s.classList.add('rainbow');
-  } else {
-    s.src = 'star_normal.PNG';
-    s.dataset.point = 1;
-  }
-
-  s.classList.add('star', 'visible');
-
-  if (!currentStage.sway) {
-    s.style.animationName = 'drop';
-  } else {
-    s.style.animation = `drop ${currentStage.speed}ms linear, sway 2s linear infinite`;
-  }
-
-  s.style.left = Math.random() * (window.innerWidth - 50) + 'px';
-  s.style.animationDuration = `${currentStage.speed}ms`;
-  area.appendChild(s);
-  pop.play();
-
-  const check = setInterval(() => {
-    const sr = s.getBoundingClientRect();
-    const rr = raccoon.getBoundingClientRect();
-    if (sr.bottom >= rr.top && sr.left < rr.right && sr.right > rr.left) {
-      const point = parseInt(s.dataset.point || '1');
-      score += point;
-      scoreEl.textContent = score;
-
-      if (point === 3) {
-        diamondSound.play();
-      } else if (point === 2) {
-        catchRainbow.play();
-      } else {
-        catchSound.play();
-      }
-
-      s.remove();
-      clearInterval(check);
-    } else if (sr.top > window.innerHeight) {
-      s.remove();
-      clearInterval(check);
+    function spawnStar() {
+      const s = document.createElement('img');
+      const isRainbow = Math.random() < stages[stage].rainbow;
+      s.src = isRainbow ? 'star_rainbow.PNG' : 'star_normal.PNG';
+      s.className = 'star visible';
+      if (!stages[stage].sway) s.style.animationName = 'drop';
+      else s.style.animation = `drop ${stages[stage].speed}ms linear, sway 2s linear infinite`;
+      s.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+      s.style.animationDuration = `${stages[stage].speed}ms`;
+      area.appendChild(s);
+      pop.play();
+      const check = setInterval(() => {
+        const sr = s.getBoundingClientRect();
+        const rr = raccoon.getBoundingClientRect();
+        if (sr.bottom >= rr.top && sr.left < rr.right && sr.right > rr.left) {
+          score += isRainbow ? 2 : 1;
+          scoreEl.textContent = score;
+          if (isRainbow) catchRainbow.play();
+          else catchSound.play();
+          s.remove();
+          clearInterval(check);
+        } else if (sr.top > window.innerHeight) {
+          s.remove();
+          clearInterval(check);
+        }
+      }, 50);
     }
-  }, 50);
-}
 
-
-  
+    function endStage() {
+      clearInterval(interval);
       clearInterval(timer);
       running = false;
       if (score >= stages[stage].goal) {
