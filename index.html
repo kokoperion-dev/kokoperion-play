@@ -15,7 +15,7 @@
     #game-area {
       position: relative;
       width: 100vw;
-      height: 100vh;
+      height: 80vh; /* ここを修正 */
       background-image: url('background.PNG');
       background-size: cover;
       background-position: center;
@@ -29,7 +29,7 @@
     }
     #raccoon {
       position: absolute;
-      bottom: 30px;
+      bottom: 10px; /* ここを修正 */
       left: 50%;
       transform: translateX(-50%);
       width: 120px;
@@ -56,7 +56,8 @@
     }
     @keyframes sway {
       0% { transform: translateX(0); }
-      50% { transform: translateX(10px); }
+      25% { transform: translateX(20px); } /* 動きを修正 */
+      75% { transform: translateX(-20px); } /* 動きを修正 */
       100% { transform: translateX(0); }
     }
     #message-overlay {
@@ -127,8 +128,7 @@
 </head>
 <body>
   <div id="game-area">
-    <img id="kokopelli" src="kokopell.JPG" />
-    <img id="raccoon" src="raccoon.PNG" />
+    <img id="kokopelli" src="kokopelli.PNG" /> <img id="raccoon" src="raccoon.PNG" />
     <div id="stage-display">ステージ: <span id="stage-num">1</span></div>
     <div id="score-display">スコア: <span id="score">0</span></div>
     <div id="timer-display">残り時間: <span id="timer">30</span>秒</div>
@@ -173,7 +173,7 @@
     
     const stages = [
       { starDropInterval: 1500, starSwayAmplitude: 10, starSpeed: 4000, rainbowStarChance: 0, requiredScore: 15 },
-      { starDropInterval: 1200, starSwayAmplitude: 20, starSpeed: 3500, rainbowStarChance: 0, requiredScore: 15 },
+      { starDropInterval: 1500, starSwayAmplitude: 30, starSpeed: 5000, rainbowStarChance: 0, requiredScore: 15 }, // ここを修正しました
       { starDropInterval: 1000, starSwayAmplitude: 15, starSpeed: 3000, rainbowStarChance: 0.2, requiredScore: 15 }
     ];
 
@@ -242,7 +242,7 @@
 
       star.style.left = Math.random() * (window.innerWidth - 50) + 'px';
       star.style.animationDuration = `${stageConfig.starSpeed / 1000}s, 2s`;
-      document.styleSheets[0].insertRule(`@keyframes sway { 0% { transform: translateX(0); } 50% { transform: translateX(${stageConfig.starSwayAmplitude}px); } 100% { transform: translateX(0); } }`);
+      document.styleSheets[0].insertRule(`@keyframes sway { 0% { transform: translateX(0); } 25% { transform: translateX(${stageConfig.starSwayAmplitude}px); } 75% { transform: translateX(-${stageConfig.starSwayAmplitude}px); } 100% { transform: translateX(0); } }`);
       
       gameArea.appendChild(star);
 
