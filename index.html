@@ -9,6 +9,7 @@
 <body>
 
     <audio id="bgm" src="fail_bgm.mp3" loop></audio>
+    <audio id="catch-sound" src="star_catch.mp3"></audio>
 
     <div id="game-container">
         <img id="kokopelli" src="kokopelli.PNG" alt="ココペリ">
@@ -17,6 +18,10 @@
         <div id="game-screen"></div>
         <div id="ui-overlay">
             <h1 id="title-text">ココペリの星</h1>
+            <div id="status-bar">
+                <span id="score-display">スコア: 0</span>
+                <span id="timer-display">時間: 60</span>
+            </div>
             <button id="start-button">ゲーム開始</button>
             <div id="result-message"></div>
             <button id="next-stage-button" class="hidden">次のステージへ</button>
