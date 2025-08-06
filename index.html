@@ -1,18 +1,16 @@
-
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ココペリオン</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      background: black;
+      background: #000;
+      font-family: 'serif', sans-serif;
       overflow: hidden;
-      font-family: sans-serif;
     }
     #game-area {
       position: relative;
@@ -25,32 +23,26 @@
     #kokopelli {
       position: absolute;
       top: 10%;
-      left: 5%;
+      left: 10%;
       width: 100px;
       z-index: 10;
-      animation: float 3s ease-in-out infinite alternate;
-    }
-    @keyframes float {
-      0% { transform: translateX(0); }
-      50% { transform: translateX(20px); }
-      100% { transform: translateX(-20px); }
     }
     #raccoon {
       position: absolute;
-      bottom: 10px;
+      bottom: 20px;
       left: 50%;
-      transform: translateX(-50%);
       width: 120px;
       z-index: 10;
     }
     .star {
       position: absolute;
       width: 40px;
-      animation-name: drop, sway;
-      animation-timing-function: linear;
-      animation-iteration-count: 1;
       opacity: 0;
       transition: opacity 0.5s;
+      animation-name: drop, sway;
+      animation-duration: 3s, 2s;
+      animation-iteration-count: 1, infinite;
+      animation-timing-function: linear;
     }
     .star.rainbow {
       width: 50px;
@@ -63,171 +55,244 @@
       to { top: 100%; }
     }
     @keyframes sway {
-      0% { transform: translateX(0); }
-      25% { transform: translateX(20px); }
-      75% { transform: translateX(-20px); }
+      0%   { transform: translateX(0); }
+      25%  { transform: translateX(10px); }
+      75%  { transform: translateX(-10px); }
       100% { transform: translateX(0); }
     }
     #score-display, #timer-display, #stage-display {
       position: absolute;
       color: white;
-      font-size: 20px;
-      z-index: 20;
+      font-size: 24px;
+      z-index: 50;
     }
-    #score-display { top: 10px; right: 10px; }
-    #timer-display { top: 10px; right: 150px; }
-    #stage-display { top: 10px; left: 10px; }
+    #score-display { top: 20px; right: 20px; }
+    #timer-display { top: 20px; right: 200px; }
+    #stage-display { top: 20px; right: 400px; }
 
     #message-overlay {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
       color: white;
-      z-index: 100;
-      display: none;
+      display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      flex-direction: column;
-      text-align: center;
-      padding: 20px;
+      z-index: 100;
+      display: none;
+    }
+    #message-overlay h2 {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+    #message-overlay p {
+      font-size: 24px;
+      margin: 10px 0;
     }
     #message-overlay img {
       width: 150px;
-      margin: 20px 0;
+      margin-top: 20px;
     }
     #message-overlay button {
-      font-size: 18px;
-      padding: 10px 20px;
-      margin-top: 20px;
+      padding: 15px 30px;
+      margin-top: 30px;
+      font-size: 20px;
+      background-color: #e59a4b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <div id="game-area">
-    <img id="kokopelli" src="kokopelli.PNG" />
+    <img id="kokopelli" src="kokopell.JPG" />
     <img id="raccoon" src="raccoon.PNG" />
+    <div id="stage-display">ステージ: <span id="stage-num">1</span></div>
     <div id="score-display">スコア: <span id="score">0</span></div>
-    <div id="timer-display">残り: <span id="timer">30</span>秒</div>
-    <div id="stage-display">ステージ: <span id="stage">1</span></div>
+    <div id="timer-display">残り時間: <span id="timer">30</span>秒</div>
   </div>
 
   <div id="message-overlay">
     <div id="message-content"></div>
-    <button id="next-button">次へ</button>
-    <button id="retry-button">もう一度</button>
+    <button id="next-button" style="display: none;">次のステージへ</button>
+    <button id="retry-button" style="display: none;">再チャレンジ</button>
   </div>
 
-  <audio id="sound-pop" src="star_pop.mp3"></audio>
-  <audio id="sound-catch" src="star_catch.mp3"></audio>
-  <audio id="sound-catch-rainbow" src="star_catch_rainbow.mp3"></audio>
-  <audio id="bgm-clear" src="clear_bgm.mp3"></audio>
-  <audio id="bgm-fail" src="fail_bgm.mp3"></audio>
+  <!-- 音声ファイル -->
+  <audio id="sound-pop" src="star_pop.mp3" preload="auto"></audio>
+  <audio id="sound-pop-rainbow" src="star_pop_rainbow.mp3" preload="auto"></audio>
+  <audio id="sound-catch" src="star_catch.mp3" preload="auto"></audio>
+  <audio id="sound-catch-rainbow" src="star_catch_rainbow.mp3" preload="auto"></audio>
+  <audio id="bgm-clear" src="clear_bgm.mp3" preload="auto"></audio>
+  <audio id="bgm-fail" src="fail_bgm.mp3" preload="auto"></audio>
 
   <script>
-    const stages = [
-      { dropInterval: 2000, sway: false, speed: 5000, goal: 20, rainbow: 0 },
-      { dropInterval: 1500, sway: true, speed: 4500, goal: 30, rainbow: 0 },
-      { dropInterval: 1000, sway: true, speed: 3000, goal: 40, rainbow: 0.3 }
-    ];
-
-    let stage = 0, score = 0, time = 30, interval, timer, running = false;
-
+    const gameArea = document.getElementById('game-area');
     const raccoon = document.getElementById('raccoon');
-    const kokopelli = document.getElementById('kokopelli');
-    const area = document.getElementById('game-area');
-    const scoreEl = document.getElementById('score');
-    const timerEl = document.getElementById('timer');
-    const stageEl = document.getElementById('stage');
-    const message = document.getElementById('message-overlay');
+    const scoreDisplay = document.getElementById('score');
+    const timerDisplay = document.getElementById('timer');
+    const stageDisplay = document.getElementById('stage-num');
+    const messageOverlay = document.getElementById('message-overlay');
     const messageContent = document.getElementById('message-content');
     const nextButton = document.getElementById('next-button');
     const retryButton = document.getElementById('retry-button');
-    const pop = document.getElementById('sound-pop');
-    const catchSound = document.getElementById('sound-catch');
-    const catchRainbow = document.getElementById('sound-catch-rainbow');
-    const clearBgm = document.getElementById('bgm-clear');
-    const failBgm = document.getElementById('bgm-fail');
 
-    function startStage() {
-      score = 0;
-      time = 30;
-      scoreEl.textContent = score;
-      timerEl.textContent = time;
-      stageEl.textContent = stage + 1;
-      message.style.display = 'none';
-      running = true;
-      interval = setInterval(spawnStar, stages[stage].dropInterval);
-      timer = setInterval(() => {
-        time--;
-        timerEl.textContent = time;
-        if (time <= 0) endStage();
-      }, 1000);
+    const popSound = document.getElementById('sound-pop');
+    const popSoundRainbow = document.getElementById('sound-pop-rainbow');
+    const catchSound = document.getElementById('sound-catch');
+    const catchSoundRainbow = document.getElementById('sound-catch-rainbow');
+    const bgmClear = document.getElementById('bgm-clear');
+    const bgmFail = document.getElementById('bgm-fail');
+
+    let score = 0;
+    let gameTimer;
+    let starInterval;
+    let currentStage = 1;
+    let gameRunning = false;
+
+    const stages = [
+      { starDropInterval: 1500, starSpeed: 3000, rainbowStarChance: 0.1, requiredScore: 15 },
+      { starDropInterval: 1200, starSpeed: 3000, rainbowStarChance: 0.4, requiredScore: 40 },
+      { starDropInterval: 1000, starSpeed: 3000, rainbowStarChance: 0.6, requiredScore: 60 }
+    ];
+
+    function updateScore(points) {
+      score += points;
+      scoreDisplay.textContent = score;
     }
 
-    function spawnStar() {
-      const s = document.createElement('img');
-      const isRainbow = Math.random() < stages[stage].rainbow;
-      s.src = isRainbow ? 'star_rainbow.PNG' : 'star_normal.PNG';
-      s.className = 'star visible';
-      if (!stages[stage].sway) s.style.animationName = 'drop';
-      else s.style.animation = `drop ${stages[stage].speed}ms linear, sway 2s linear infinite`;
-      s.style.left = Math.random() * (window.innerWidth - 50) + 'px';
-      s.style.animationDuration = `${stages[stage].speed}ms`;
-      area.appendChild(s);
-      pop.play();
-      const check = setInterval(() => {
-        const sr = s.getBoundingClientRect();
+    function dropStar() {
+      if (!gameRunning) return;
+
+      const stageConfig = stages[currentStage - 1];
+      const star = document.createElement('img');
+      const rand = Math.random();
+
+      let isRainbow = rand < stageConfig.rainbowStarChance;
+      star.src = isRainbow ? 'star_rainbow.PNG' : 'star_normal.PNG';
+      star.className = isRainbow ? 'star rainbow visible' : 'star visible';
+
+      star.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+      star.style.animationDuration = `${stageConfig.starSpeed}ms, 2s`;
+
+      gameArea.appendChild(star);
+
+      if (isRainbow) popSoundRainbow.play();
+      else popSound.play();
+
+      const checkCollision = setInterval(() => {
+        const sr = star.getBoundingClientRect();
         const rr = raccoon.getBoundingClientRect();
         if (sr.bottom >= rr.top && sr.left < rr.right && sr.right > rr.left) {
-          score += isRainbow ? 2 : 1;
-          scoreEl.textContent = score;
-          if (isRainbow) catchRainbow.play();
+          updateScore(isRainbow ? 2 : 1);
+          if (isRainbow) catchSoundRainbow.play();
           else catchSound.play();
-          s.remove();
-          clearInterval(check);
+          star.remove();
+          clearInterval(checkCollision);
         } else if (sr.top > window.innerHeight) {
-          s.remove();
-          clearInterval(check);
+          star.remove();
+          clearInterval(checkCollision);
         }
       }, 50);
     }
 
-    function endStage() {
-      clearInterval(interval);
-      clearInterval(timer);
-      running = false;
-      if (score >= stages[stage].goal) {
-        clearBgm.play();
-        messageContent.innerHTML = `<p>ステージ${stage + 1}クリア！</p>`;
-        nextButton.style.display = stage < 2 ? 'inline-block' : 'none';
-      } else {
-        failBgm.play();
-        messageContent.innerHTML = `<p>ステージ${stage + 1}失敗…</p>`;
-        nextButton.style.display = 'none';
-      }
-      retryButton.style.display = 'inline-block';
-      message.style.display = 'flex';
+    function startGame() {
+      bgmClear.pause(); bgmClear.currentTime = 0;
+      bgmFail.pause();  bgmFail.currentTime = 0;
+
+      resetGame();
+      gameRunning = true;
+      messageOverlay.style.display = 'none';
+      stageDisplay.textContent = currentStage;
+
+      // アライグマの中央初期位置（transformなしで中央に）
+      raccoon.style.left = (window.innerWidth / 2 - raccoon.offsetWidth / 2) + 'px';
+
+      let timeLeft = 30;
+      timerDisplay.textContent = timeLeft;
+
+      const stageConfig = stages[currentStage - 1];
+      starInterval = setInterval(dropStar, stageConfig.starDropInterval);
+
+      gameTimer = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(gameTimer);
+          clearInterval(starInterval);
+          endGame();
+        }
+      }, 1000);
     }
 
-    nextButton.onclick = () => { stage++; startStage(); };
-    retryButton.onclick = () => { if (stage > 2) stage = 0; startStage(); };
+    function endGame() {
+      gameRunning = false;
+      messageOverlay.style.display = 'flex';
+      const stageConfig = stages[currentStage - 1];
+      if (score >= stageConfig.requiredScore) {
+        bgmClear.play();
+        if (currentStage === 3) {
+          messageContent.innerHTML = `<p>全ステージクリア！</p>`;
+          nextButton.style.display = 'none';
+          retryButton.textContent = '最初からやり直す';
+        } else {
+          messageContent.innerHTML = `<p>ステージ ${currentStage} クリア！</p>`;
+          nextButton.style.display = 'block';
+          retryButton.style.display = 'none';
+        }
+        retryButton.style.display = 'block';
+      } else {
+        bgmFail.play();
+        messageContent.innerHTML = `<p>ステージ ${currentStage} 失敗</p><p>またチャレンジしてみよう</p>`;
+        nextButton.style.display = 'none';
+        retryButton.textContent = '再チャレンジ';
+        retryButton.style.display = 'block';
+      }
+    }
 
-    // スマホスワイプ操作
+    function resetGame() {
+      score = 0;
+      scoreDisplay.textContent = 0;
+      document.querySelectorAll('.star').forEach(star => star.remove());
+    }
+
+    function nextStage() {
+      currentStage++;
+      if (currentStage > 3) currentStage = 1;
+      startGame();
+    }
+
+    function retryStage() {
+      if (currentStage === 3 && retryButton.textContent === '最初からやり直す') {
+        currentStage = 1;
+      }
+      startGame();
+    }
+
+    // スワイプ操作
     let startX = null;
-    window.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+    window.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
     window.addEventListener('touchmove', e => {
-      if (!running || startX === null) return;
+      if (!gameRunning || startX === null) return;
+      e.preventDefault();
       const deltaX = e.touches[0].clientX - startX;
       let newLeft = raccoon.offsetLeft + deltaX;
-      newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
+      // ← 修正：+10して右端ギリギリまで行けるように
+      newLeft = Math.min(Math.max(0, newLeft), window.innerWidth - raccoon.offsetWidth + 10);
       raccoon.style.left = newLeft + 'px';
       startX = e.touches[0].clientX;
     });
 
-    window.onload = () => { stage = 0; startStage(); };
+    nextButton.addEventListener('click', nextStage);
+    retryButton.addEventListener('click', retryStage);
+
+    window.onload = startGame;
   </script>
 </body>
 </html>
-</details>
-
