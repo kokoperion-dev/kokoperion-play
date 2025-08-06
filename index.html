@@ -45,14 +45,17 @@
       position: absolute;
       width: 40px;
       animation: 
-        drop linear,
-        sway ease-in-out infinite;
-      animation-iteration-count: 1;
+        drop 4000ms linear,
+        sway ease-in-out infinite,
+        rotate 4s linear infinite;
       opacity: 0;
       transition: opacity 0.5s;
     }
     .star.rainbow {
-      width: 50px;
+      width: 45px;
+    }
+    .star.diamond {
+      width: 35px;
     }
     .star.visible {
       opacity: 1;
@@ -62,11 +65,15 @@
       to { top: 100%; }
     }
     @keyframes sway {
-      0% { transform: translateX(0); }
-      25% { transform: translateX(var(--sway-amplitude)); }
-      50% { transform: translateX(0); }
-      75% { transform: translateX(calc(-1 * var(--sway-amplitude))); }
-      100% { transform: translateX(0); }
+      0% { transform: translateX(0) rotate(0deg); }
+      25% { transform: translateX(var(--sway-amplitude)) rotate(5deg); }
+      50% { transform: translateX(0) rotate(0deg); }
+      75% { transform: translateX(calc(-1 * var(--sway-amplitude))) rotate(-5deg); }
+      100% { transform: translateX(0) rotate(0deg); }
+    }
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
     #score-display, #timer-display, #stage-display {
       position: absolute;
@@ -121,14 +128,41 @@
   <audio id="sound-pop" src="star_pop.mp3"></audio>
   <audio id="sound-catch" src="star_catch.mp3"></audio>
   <audio id="sound-catch-rainbow" src="star_catch_rainbow.mp3"></audio>
+  <audio id="sound-catch-diamond" src="star_catch_diamond.mp3"></audio>
   <audio id="bgm-clear" src="clear_bgm.mp3"></audio>
   <audio id="bgm-fail" src="fail_bgm.mp3"></audio>
 
   <script>
     const stages = [
-      { dropInterval: 2000, sway: false, speed: 5000, goal: 20, rainbow: 0 },
-      { dropInterval: 1500, sway: true, speed: 4500, goal: 30, rainbow: 0 },
-      { dropInterval: 1000, sway: true, speed: 3000, goal: 40, rainbow: 0.3 }
+      { 
+        dropInterval: 2000, 
+        speed: 4000, 
+        goal: 15,
+        starTypes: [
+          { type: 'normal', prob: 0.9, score: 1, sound: 'sound-catch' },
+          { type: 'rainbow', prob: 0.1, score: 2, sound: 'sound-catch-rainbow' }
+        ]
+      },
+      { 
+        dropInterval: 1500, 
+        speed: 4000, 
+        goal: 40,
+        starTypes: [
+          { type: 'normal', prob: 0.5, score: 1, sound: 'sound-catch' },
+          { type: 'rainbow', prob: 0.4, score: 2, sound: 'sound-catch-rainbow' },
+          { type: 'diamond', prob: 0.1, score: 3, sound: 'sound-catch-diamond' }
+        ]
+      },
+      { 
+        dropInterval: 1000, 
+        speed: 4000, 
+        goal: 60,
+        starTypes: [
+          { type: 'normal', prob: 0.1, score: 1, sound: 'sound-catch' },
+          { type: 'rainbow', prob: 0.5, score: 2, sound: 'sound-catch-rainbow' },
+          { type: 'diamond', prob: 0.4, score: 3, sound: 'sound-catch-diamond' }
+        ]
+      }
     ];
 
     let stage = 0, score = 0, time = 30, interval, timer, running = false;
@@ -144,10 +178,61 @@
     const nextButton = document.getElementById('next-button');
     const retryButton = document.getElementById('retry-button');
     const pop = document.getElementById('sound-pop');
-    const catchSound = document.getElementById('sound-catch');
-    const catchRainbow = document.getElementById('sound-catch-rainbow');
     const clearBgm = document.getElementById('bgm-clear');
     const failBgm = document.getElementById('bgm-fail');
+
+    function getRandomStarType() {
+      const currentStage = stages[stage];
+      const rand = Math.random();
+      let cumulativeProb = 0;
+      
+      for (const starType of currentStage.starTypes) {
+        cumulativeProb += starType.prob;
+        if (rand <= cumulativeProb) {
+          return starType;
+        }
+      }
+      
+      return currentStage.starTypes[0]; // デフォルト
+    }
+
+    function spawnStar() {
+      const s = document.createElement('img');
+      const starType = getRandomStarType();
+      
+      s.src = `${starType.type}_star.PNG`;
+      s.className = `star visible ${starType.type}`;
+      
+      const swayAmplitude = 50 + Math.random() * 50;
+      const swayDuration = 2000 + Math.random() * 1000;
+      
+      s.style.animation = `
+        drop ${currentStage.speed}ms linear,
+        sway ${swayDuration}ms ease-in-out infinite,
+        rotate 4s linear infinite
+      `;
+      s.style.setProperty('--sway-amplitude', `${swayAmplitude}px`);
+      s.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+      
+      area.appendChild(s);
+      pop.play();
+      
+      const check = setInterval(() => {
+        const sr = s.getBoundingClientRect();
+        const rr = raccoon.getBoundingClientRect();
+        
+        if (sr.bottom >= rr.top && sr.left < rr.right && sr.right > rr.left) {
+          score += starType.score;
+          scoreEl.textContent = score;
+          document.getElementById(starType.sound).play();
+          s.remove();
+          clearInterval(check);
+        } else if (sr.top > window.innerHeight) {
+          s.remove();
+          clearInterval(check);
+        }
+      }, 50);
+    }
 
     function startStage() {
       score = 0;
@@ -163,49 +248,6 @@
         timerEl.textContent = time;
         if (time <= 0) endStage();
       }, 1000);
-    }
-
-    function spawnStar() {
-      const s = document.createElement('img');
-      const isRainbow = Math.random() < stages[stage].rainbow;
-      s.src = isRainbow ? 'star_rainbow.PNG' : 'star_normal.PNG';
-      s.className = 'star visible';
-      
-      // アニメーション設定
-      const swayAmplitude = 50 + Math.random() * 50; // 揺れ幅をランダムに(50-100px)
-      const swayDuration = 2000 + Math.random() * 1000; // 揺れ周期をランダムに(2-3秒)
-      
-      s.style.animation = `
-        drop ${stages[stage].speed}ms linear,
-        sway ${swayDuration}ms ease-in-out infinite
-      `;
-      
-      // 初期位置をランダムに
-      s.style.left = Math.random() * (window.innerWidth - 50) + 'px';
-      s.style.setProperty('--sway-amplitude', `${swayAmplitude}px`);
-      
-      if (isRainbow) {
-        s.classList.add('rainbow');
-      }
-      
-      area.appendChild(s);
-      pop.play();
-      
-      const check = setInterval(() => {
-        const sr = s.getBoundingClientRect();
-        const rr = raccoon.getBoundingClientRect();
-        if (sr.bottom >= rr.top && sr.left < rr.right && sr.right > rr.left) {
-          score += isRainbow ? 2 : 1;
-          scoreEl.textContent = score;
-          if (isRainbow) catchRainbow.play();
-          else catchSound.play();
-          s.remove();
-          clearInterval(check);
-        } else if (sr.top > window.innerHeight) {
-          s.remove();
-          clearInterval(check);
-        }
-      }, 50);
     }
 
     function endStage() {
@@ -241,7 +283,7 @@
       newLeft = Math.max(0, Math.min(areaRect.width - raccoonRect.width, newLeft));
       
       raccoon.style.left = newLeft + 'px';
-      raccoon.style.transform = 'translateX(0)'; // transformリセット
+      raccoon.style.transform = 'translateX(0)';
       raccoon.style.bottom = '10%';
       
       startX = e.touches[0].clientX;
