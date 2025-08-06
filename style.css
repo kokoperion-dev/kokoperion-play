@@ -1,0 +1,88 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    background-color: #000;
+    font-family: sans-serif;
+    color: #fff;
+    text-align: center;
+}
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+#background {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('background.png');
+    background-size: cover;
+    z-index: -1;
+}
+#kokopelli {
+    position: absolute;
+    top: 5vh;
+    left: 5vw;
+    width: 150px;
+    animation: kokopelli-rotate 3s infinite ease-in-out;
+}
+@keyframes kokopelli-rotate {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(15deg); }
+}
+#raccoon {
+    position: absolute;
+    bottom: 5vh;
+    width: 150px;
+    animation: raccoon-move 15s infinite ease-in-out alternate;
+}
+@keyframes raccoon-move {
+    0% { left: 5vw; }
+    100% { left: calc(95vw - 150px); }
+}
+#game-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+.star {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-size: contain;
+    animation-timing-function: linear;
+    animation: star-fall-wave 3s linear forwards;
+    cursor: pointer;
+}
+.star.normal {
+    background-image: url('star_normal.png');
+}
+.star.rainbow {
+    background-image: url('star_rainbow.png');
+}
+.star.diamond {
+    background-image: url('diamond.png');
+}
+@keyframes star-fall-wave {
+    0% { transform: translate(0, -10vh); opacity: 1; }
+    100% { transform: translate(100px, 110vh); opacity: 0.5; }
+}
+#ui-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+}
+button {
+    font-size: 2em;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+.hidden {
+    display: none;
+}
