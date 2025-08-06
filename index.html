@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -36,7 +35,7 @@
     }
     #raccoon {
       position: absolute;
-      bottom: 10px;
+      bottom: 30px;
       left: 50%;
       transform: translateX(-50%);
       width: 120px;
@@ -53,6 +52,9 @@
     }
     .star.rainbow {
       width: 50px;
+    }
+    .star.diamond {
+      width: 55px;
     }
     .star.visible {
       opacity: 1;
@@ -117,23 +119,24 @@
     <button id="retry-button">もう一度</button>
   </div>
 
+  <!-- 音声 -->
   <audio id="sound-pop" src="star_pop.mp3"></audio>
   <audio id="sound-catch" src="star_catch.mp3"></audio>
   <audio id="sound-catch-rainbow" src="star_catch_rainbow.mp3"></audio>
+  <audio id="sound-catch-diamond" src="star_catch_diamond.mp3"></audio>
   <audio id="bgm-clear" src="clear_bgm.mp3"></audio>
   <audio id="bgm-fail" src="fail_bgm.mp3"></audio>
 
   <script>
     const stages = [
-      { dropInterval: 2000, sway: false, speed: 5000, goal: 20, rainbow: 0 },
-      { dropInterval: 1500, sway: true, speed: 4500, goal: 30, rainbow: 0 },
-      { dropInterval: 1000, sway: true, speed: 3000, goal: 40, rainbow: 0.3 }
+      { dropInterval: 1500, rainbow: 0.1, diamond: 0.0, goal: 25 },
+      { dropInterval: 1000, rainbow: 0.4, diamond: 0.1, goal: 50 },
+      { dropInterval: 800, rainbow: 0.5, diamond: 0.4, goal: 70 }
     ];
 
     let stage = 0, score = 0, time = 30, interval, timer, running = false;
 
     const raccoon = document.getElementById('raccoon');
-    const kokopelli = document.getElementById('kokopelli');
     const area = document.getElementById('game-area');
     const scoreEl = document.getElementById('score');
     const timerEl = document.getElementById('timer');
@@ -142,9 +145,11 @@
     const messageContent = document.getElementById('message-content');
     const nextButton = document.getElementById('next-button');
     const retryButton = document.getElementById('retry-button');
+
     const pop = document.getElementById('sound-pop');
-    const catchSound = document.getElementById('sound-catch');
+    const catchNormal = document.getElementById('sound-catch');
     const catchRainbow = document.getElementById('sound-catch-rainbow');
+    const catchDiamond = document.getElementById('sound-catch-diamond');
     const clearBgm = document.getElementById('bgm-clear');
     const failBgm = document.getElementById('bgm-fail');
 
@@ -165,24 +170,37 @@
     }
 
     function spawnStar() {
+      const rand = Math.random();
+      let src = 'star_normal.PNG', points = 1, className = 'star';
+      let sound = catchNormal;
+
+      if (rand < stages[stage].diamond) {
+        src = 'diamond.PNG';
+        points = 3;
+        className += ' diamond';
+        sound = catchDiamond;
+      } else if (rand < stages[stage].diamond + stages[stage].rainbow) {
+        src = 'star_rainbow.PNG';
+        points = 2;
+        className += ' rainbow';
+        sound = catchRainbow;
+      }
+
       const s = document.createElement('img');
-      const isRainbow = Math.random() < stages[stage].rainbow;
-      s.src = isRainbow ? 'star_rainbow.PNG' : 'star_normal.PNG';
-      s.className = 'star visible';
-      if (!stages[stage].sway) s.style.animationName = 'drop';
-      else s.style.animation = `drop ${stages[stage].speed}ms linear, sway 2s linear infinite`;
+      s.src = src;
+      s.className = className + ' visible';
       s.style.left = Math.random() * (window.innerWidth - 50) + 'px';
-      s.style.animationDuration = `${stages[stage].speed}ms`;
+      s.style.animation = `drop 3s linear, sway 2s linear infinite`;
       area.appendChild(s);
       pop.play();
+
       const check = setInterval(() => {
         const sr = s.getBoundingClientRect();
         const rr = raccoon.getBoundingClientRect();
         if (sr.bottom >= rr.top && sr.left < rr.right && sr.right > rr.left) {
-          score += isRainbow ? 2 : 1;
+          score += points;
           scoreEl.textContent = score;
-          if (isRainbow) catchRainbow.play();
-          else catchSound.play();
+          sound.play();
           s.remove();
           clearInterval(check);
         } else if (sr.top > window.innerHeight) {
@@ -196,6 +214,7 @@
       clearInterval(interval);
       clearInterval(timer);
       running = false;
+
       if (score >= stages[stage].goal) {
         clearBgm.play();
         messageContent.innerHTML = `<p>ステージ${stage + 1}クリア！</p>`;
@@ -205,6 +224,7 @@
         messageContent.innerHTML = `<p>ステージ${stage + 1}失敗…</p>`;
         nextButton.style.display = 'none';
       }
+
       retryButton.style.display = 'inline-block';
       message.style.display = 'flex';
     }
@@ -228,4 +248,3 @@
   </script>
 </body>
 </html>
-</details>
