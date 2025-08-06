@@ -29,8 +29,9 @@
     }
     #raccoon {
       position: absolute;
-      bottom: 20px;
+      bottom: 0px;
       left: 50%;
+      transform: translateX(-50%);
       width: 120px;
       z-index: 10;
     }
@@ -55,9 +56,8 @@
       to { top: 100%; }
     }
     @keyframes sway {
-      0%   { transform: translateX(0); }
-      25%  { transform: translateX(10px); }
-      75%  { transform: translateX(-10px); }
+      0% { transform: translateX(0); }
+      50% { transform: translateX(20px); }
       100% { transform: translateX(0); }
     }
     #score-display, #timer-display, #stage-display {
@@ -124,7 +124,6 @@
     <button id="retry-button" style="display: none;">再チャレンジ</button>
   </div>
 
-  <!-- 音声ファイル -->
   <audio id="sound-pop" src="star_pop.mp3" preload="auto"></audio>
   <audio id="sound-pop-rainbow" src="star_pop_rainbow.mp3" preload="auto"></audio>
   <audio id="sound-catch" src="star_catch.mp3" preload="auto"></audio>
@@ -282,9 +281,9 @@
       if (!gameRunning || startX === null) return;
       e.preventDefault();
       const deltaX = e.touches[0].clientX - startX;
+      const raccoonRect = raccoon.getBoundingClientRect();
       let newLeft = raccoon.offsetLeft + deltaX;
-      // ← 修正：+10して右端ギリギリまで行けるように
-      newLeft = Math.min(Math.max(0, newLeft), window.innerWidth - raccoon.offsetWidth + 10);
+      newLeft = Math.min(Math.max(0, newLeft), window.innerWidth - raccoonRect.width);
       raccoon.style.left = newLeft + 'px';
       startX = e.touches[0].clientX;
     });
