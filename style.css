@@ -36,11 +36,8 @@ body {
     position: absolute;
     bottom: 5vh;
     width: 150px;
-    animation: raccoon-move 15s infinite ease-in-out alternate;
-}
-@keyframes raccoon-move {
-    0% { left: 5vw; }
-    100% { left: calc(95vw - 150px); }
+    z-index: 5;
+    touch-action: none; /* タッチイベントのデフォルト動作を無効化 */
 }
 #game-screen {
     position: absolute;
@@ -54,9 +51,7 @@ body {
     width: 30px;
     height: 30px;
     background-size: contain;
-    animation-timing-function: linear;
-    animation: star-fall-wave 3s linear forwards;
-    cursor: pointer;
+    animation: star-fall 3s linear forwards;
 }
 .star.normal {
     background-image: url('star_normal.PNG');
@@ -67,9 +62,9 @@ body {
 .star.diamond {
     background-image: url('diamond.PNG');
 }
-@keyframes star-fall-wave {
-    0% { transform: translate(0, -10vh); opacity: 1; }
-    100% { transform: translate(100px, 110vh); opacity: 0.5; }
+@keyframes star-fall {
+    0% { transform: translateY(-10vh); opacity: 1; }
+    100% { transform: translateY(110vh); opacity: 0.5; }
 }
 #ui-overlay {
     position: absolute;
@@ -77,6 +72,15 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 10;
+}
+#status-bar {
+    position: absolute;
+    top: -50vh;
+    width: 100vw;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    font-size: 1.5em;
 }
 button {
     font-size: 2em;
