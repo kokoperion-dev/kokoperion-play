@@ -3,25 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ココペリの星</title>
+    <title>ココペリオン</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <audio id="bgm" src="fail_bgm.mp3" loop></audio>
-    <audio id="catch-sound" src="star_catch.mp3"></audio>
+    <audio id="bgm" src="sounds/fail_bgm.mp3" loop></audio>
 
     <div id="game-container">
-        <img id="kokopelli" src="kokopelli.PNG" alt="ココペリ">
-        <img id="raccoon" src="raccoon.PNG" alt="アライグマ">
+        <img id="kokopelli" src="./images/kokopelli.png" alt="ココペリ">
+        <img id="raccoon" src="./images/raccoon.png" alt="アライグマ">
         <div id="background"></div>
         <div id="game-screen"></div>
         <div id="ui-overlay">
             <h1 id="title-text">ココペリの星</h1>
-            <div id="status-bar">
-                <span id="score-display">スコア: 0</span>
-                <span id="timer-display">時間: 60</span>
-            </div>
             <button id="start-button">ゲーム開始</button>
             <div id="result-message"></div>
             <button id="next-stage-button" class="hidden">次のステージへ</button>
