@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ココペリオン - 完全版</title>
+  <title>ココペリオン - 完成版</title>
   <style>
     body {
       margin: 0;
@@ -11,7 +11,6 @@
       background: #0a0e17;
       overflow: hidden;
       font-family: 'Arial', sans-serif;
-      touch-action: pan-y;
     }
     #game-area {
       position: relative;
@@ -49,8 +48,9 @@
       width: 30px;
       height: 30px;
       animation: 
-        drop 5s linear forwards,
-        sway 8s linear infinite;
+        drop 6s linear forwards,
+        sway 8s linear infinite,
+        rotate 10s linear infinite;
       opacity: 0;
       transition: opacity 0.5s ease-out;
       z-index: 10;
@@ -80,7 +80,47 @@
       75% { transform: translateX(calc(-1 * var(--sway-amplitude))); }
       100% { transform: translateX(calc(-1 * var(--sway-amplitude))); }
     }
-    /* スコア表示などのスタイルは変更なし */
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    #score-display, #timer-display, #stage-display {
+      position: absolute;
+      color: white;
+      font-size: 20px;
+      z-index: 20;
+      text-shadow: 0 0 5px #000;
+      padding: 8px 15px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 20px;
+    }
+    #score-display { top: 15px; right: 15px; }
+    #timer-display { top: 15px; right: 160px; }
+    #stage-display { top: 15px; left: 15px; }
+    #message-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      z-index: 100;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 20px;
+    }
+    #message-overlay button {
+      font-size: 18px;
+      padding: 12px 25px;
+      margin: 10px;
+      background: linear-gradient(to bottom, #81d4fa, #4fc3f7);
+      color: #0a0e17;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -98,7 +138,6 @@
     <button id="retry-button">もう一度</button>
   </div>
 
-  <!-- 音声ファイル -->
   <audio id="sound-pop" src="star_pop.mp3"></audio>
   <audio id="sound-catch" src="star_catch.mp3"></audio>
   <audio id="sound-catch-rainbow" src="star_catch_rainbow.mp3"></audio>
@@ -107,42 +146,41 @@
   <audio id="bgm-fail" src="fail_bgm.mp3"></audio>
 
   <script>
-    // ゲーム設定
     const stages = [
       { 
-        dropInterval: 2000,
-        speed: 5000,
-        goal: 15,
+        dropInterval: 2200,
+        speed: 6000,
+        goal: 10,
         starTypes: [
-          { type: 'normal', prob: 0.9, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
-          { type: 'rainbow', prob: 0.1, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' }
+          { type: 'normal', prob: 0.8, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
+          { type: 'rainbow', prob: 0.2, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' }
+        ]
+      },
+      { 
+        dropInterval: 1800,
+        speed: 6000,
+        goal: 25,
+        starTypes: [
+          { type: 'normal', prob: 0.5, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
+          { type: 'rainbow', prob: 0.3, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
+          { type: 'diamond', prob: 0.2, score: 3, sound: 'sound-catch-diamond', img: 'diamond.png' }
         ]
       },
       { 
         dropInterval: 1500,
-        speed: 5000,
+        speed: 6000,
         goal: 40,
         starTypes: [
-          { type: 'normal', prob: 0.5, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
+          { type: 'normal', prob: 0.3, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
           { type: 'rainbow', prob: 0.4, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
-          { type: 'diamond', prob: 0.1, score: 3, sound: 'sound-catch-diamond', img: 'diamond.png' }
-        ]
-      },
-      { 
-        dropInterval: 1000,
-        speed: 5000,
-        goal: 60,
-        starTypes: [
-          { type: 'normal', prob: 0.1, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
-          { type: 'rainbow', prob: 0.5, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
-          { type: 'diamond', prob: 0.4, score: 3, sound: 'sound-catch-diamond', img: 'diamond.png' }
+          { type: 'diamond', prob: 0.3, score: 3, sound: 'sound-catch-diamond', img: 'diamond.png' }
         ]
       }
     ];
 
-    // ゲーム変数とDOM要素
     let stage = 0, score = 0, time = 30;
     let interval, timer, running = false;
+
     const raccoon = document.getElementById('raccoon');
     const area = document.getElementById('game-area');
     const scoreEl = document.getElementById('score');
@@ -153,7 +191,6 @@
     const nextButton = document.getElementById('next-button');
     const retryButton = document.getElementById('retry-button');
 
-    // 星生成関数
     function spawnStar() {
       const star = document.createElement('img');
       const currentStage = stages[stage];
@@ -173,20 +210,19 @@
       star.onerror = () => star.src = selectedType.img.replace('.png', '.PNG');
       star.className = `star visible ${selectedType.type}`;
       
-      // アニメーション設定
-      const swayAmplitude = 40; // 揺れ幅40px固定
+      const swayAmplitude = 30;
       star.style.cssText = `
         left: ${Math.random() * (window.innerWidth - 50)}px;
         --sway-amplitude: ${swayAmplitude}px;
         animation: 
-          drop ${currentStage.speed}ms linear forwards,
-          sway 8s linear infinite;
+          drop 6s linear forwards,
+          sway 8s linear infinite,
+          rotate 10s linear infinite;
       `;
       
       area.appendChild(star);
       document.getElementById('sound-pop').play();
       
-      // 当たり判定
       star.addEventListener('click', () => {
         score += selectedType.score;
         scoreEl.textContent = score;
@@ -196,8 +232,93 @@
       });
     }
 
-    // その他のゲーム関数（startStage, endStage等）は変更なし
-    window.onload = () => {
+    function startStage() {
+      score = 0;
+      time = 30;
+      scoreEl.textContent = score;
+      timerEl.textContent = time;
+      stageEl.textContent = stage + 1;
+      message.style.display = 'none';
+      running = true;
+      interval = setInterval(spawnStar, stages[stage].dropInterval);
+      timer = setInterval(() => {
+        time--;
+        timerEl.textContent = time;
+        if (time <= 0) endStage();
+      }, 1000);
+    }
+
+    function endStage() {
+      clearInterval(interval);
+      clearInterval(timer);
+      running = false;
+      if (score >= stages[stage].goal) {
+        document.getElementById('bgm-clear').play();
+        messageContent.innerHTML = `<h2>ステージ${stage + 1}クリア！</h2><p>${score}ポイント獲得！</p>`;
+        nextButton.style.display = stage < stages.length - 1 ? 'block' : 'none';
+      } else {
+        document.getElementById('bgm-fail').play();
+        messageContent.innerHTML = `<h2>ステージ${stage + 1}失敗…</h2><p>目標スコア: ${stages[stage].goal}</p><p>獲得スコア: ${score}</p>`;
+        nextButton.style.display = 'none';
+      }
+      retryButton.style.display = 'block';
+      message.style.display = 'flex';
+    }
+
+    nextButton.addEventListener('click', () => { stage++; startStage(); });
+    retryButton.addEventListener('click', () => { startStage(); });
+
+    // タッチ操作
+    let startX = null;
+    let raccoonStartX = 0;
+
+    window.addEventListener('touchstart', (e) => {
+      if (!running) return;
+      startX = e.touches[0].clientX;
+      raccoonStartX = raccoon.offsetLeft;
+    });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!running || startX === null) return;
+      const touchX = e.touches[0].clientX;
+      const deltaX = touchX - startX;
+      let newLeft = raccoonStartX + deltaX;
+      
+      newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
+      raccoon.style.left = `${newLeft}px`;
+    });
+
+    window.addEventListener('touchend', () => {
+      startX = null;
+    });
+
+    // PC用マウス操作
+    let isDragging = false;
+    let mouseStartX = 0;
+    let mouseRaccoonStartX = 0;
+
+    raccoon.addEventListener('mousedown', (e) => {
+      if (!running) return;
+      isDragging = true;
+      mouseStartX = e.clientX;
+      mouseRaccoonStartX = raccoon.offsetLeft;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging || !running) return;
+      const deltaX = e.clientX - mouseStartX;
+      let newLeft = mouseRaccoonStartX + deltaX;
+      
+      newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
+      raccoon.style.left = `${newLeft}px`;
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    // 画像フォールバック
+    window.addEventListener('load', () => {
       document.getElementById('kokopelli').onerror = function() {
         this.src = 'kokopelli.PNG';
       };
@@ -205,7 +326,7 @@
         this.src = 'raccoon.PNG';
       };
       startStage();
-    };
+    });
   </script>
 </body>
 </html>
