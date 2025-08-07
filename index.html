@@ -1,5 +1,3 @@
-完璧コード
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -151,13 +149,14 @@
   <audio id="sound-catch-diamond" src="star_catch_diamond.mp3"></audio>
   <audio id="bgm-clear" src="clear_bgm.mp3"></audio>
   <audio id="bgm-fail" src="fail_bgm.mp3"></audio>
+  <audio id="bgm-main" src="main_bgm.mp3" loop></audio>
 
   <script>
     const stages = [
       { 
         dropInterval: 2000, 
         speed: 4000, 
-        goal: 15,
+        goal: 12,
         starTypes: [
           { type: 'normal', prob: 0.9, score: 1, sound: 'sound-catch', img: 'normal_star.PNG' },
           { type: 'rainbow', prob: 0.1, score: 2, sound: 'sound-catch-rainbow', img: 'rainbow_star.PNG' }
@@ -166,7 +165,7 @@
       { 
         dropInterval: 1500, 
         speed: 4000, 
-        goal: 25, // 調整済み
+        goal: 25,
         starTypes: [
           { type: 'normal', prob: 0.5, score: 1, sound: 'sound-catch', img: 'normal_star.PNG' },
           { type: 'rainbow', prob: 0.4, score: 2, sound: 'sound-catch-rainbow', img: 'rainbow_star.PNG' },
@@ -176,7 +175,7 @@
       { 
         dropInterval: 1000, 
         speed: 4000, 
-        goal: 35, // 調整済み
+        goal: 35,
         starTypes: [
           { type: 'normal', prob: 0.1, score: 1, sound: 'sound-catch', img: 'normal_star.PNG' },
           { type: 'rainbow', prob: 0.5, score: 2, sound: 'sound-catch-rainbow', img: 'rainbow_star.PNG' },
@@ -186,7 +185,6 @@
     ];
 
     const nativeWisdom = [
-      // 追加された格言
       "ラムビー族の格言: 知識ではなく、智恵を求めよ。知識は産物だが、智恵は未来をもたらす。",
       "チェロキー族の格言: 日と夜、季節、星、太陽。その移ろいを見れば、ひとより偉大な何かの存在を思わずにはいられない。",
       "ショショネ族の格言: 自分より偉大なものには、つねに畏敬の念をもて。",
@@ -243,6 +241,7 @@
     const pop = document.getElementById('sound-pop');
     const clearBgm = document.getElementById('bgm-clear');
     const failBgm = document.getElementById('bgm-fail');
+    const mainBgm = document.getElementById('bgm-main');
 
     function getRandomStarType() {
       const rand = Math.random();
@@ -312,6 +311,10 @@
       message.style.display = 'none';
       running = true;
       
+      // BGM再生
+      mainBgm.currentTime = 0;
+      mainBgm.play();
+      
       interval = setInterval(spawnStar, currentStage.dropInterval);
       timer = setInterval(() => {
         time--;
@@ -324,6 +327,9 @@
       clearInterval(interval);
       clearInterval(timer);
       running = false;
+      
+      // BGM停止
+      mainBgm.pause();
       
       if (score >= currentStage.goal) {
         clearBgm.play();
