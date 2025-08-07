@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ココペリオン - 完成版</title>
+  <title>ココペリオン - 背景画像版</title>
   <style>
     body {
       margin: 0;
@@ -16,7 +16,7 @@
       position: relative;
       width: 100vw;
       height: 100vh;
-      background: linear-gradient(to bottom, #1a2a6c, #b21f1f, #fdbb2d);
+      background: url('your_background_image.png') center/cover no-repeat; /* ご用意の画像を適用 */
       overflow: hidden;
     }
     #kokopelli {
@@ -149,7 +149,7 @@
     const stages = [
       { 
         dropInterval: 2200,
-        speed: 8000, // 落下速度をゆっくりに
+        speed: 8000,
         goal: 10,
         starTypes: [
           { type: 'normal', prob: 0.8, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
