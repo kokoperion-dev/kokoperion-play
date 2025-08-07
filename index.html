@@ -3,73 +3,82 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ココペリオン</title>
+  <title>ココペリオン - 完成版</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      background: black;
+      background: #0a0e17;
       overflow: hidden;
-      font-family: sans-serif;
+      font-family: 'Arial', sans-serif;
     }
     #game-area {
       position: relative;
       width: 100vw;
       height: 100vh;
-      background-image: url('background.PNG');
-      background-size: cover;
-      background-position: center;
+      background: linear-gradient(to bottom, #1a2a6c, #b21f1f, #fdbb2d);
+      overflow: hidden;
     }
     #kokopelli {
       position: absolute;
-      top: 10%;
+      top: 15%;
       left: 5%;
-      width: 100px;
+      width: 80px;
       z-index: 10;
-      animation: float 3s ease-in-out infinite alternate;
+      animation: float 5s ease-in-out infinite alternate;
+      filter: drop-shadow(0 0 5px rgba(255,255,200,0.5));
     }
     @keyframes float {
-      0% { transform: translateX(0); }
-      50% { transform: translateX(20px); }
-      100% { transform: translateX(-20px); }
+      0%, 100% { transform: translateY(0) rotate(-3deg); }
+      50% { transform: translateY(-15px) rotate(3deg); }
     }
     #raccoon {
       position: absolute;
-      bottom: 10%;
+      bottom: 12%;
       left: 50%;
       transform: translateX(-50%);
-      width: 120px;
-      z-index: 10;
+      width: 100px;
+      z-index: 15;
+      user-select: none;
+      transition: transform 0.2s ease;
+      filter: drop-shadow(0 0 8px rgba(255,255,200,0.3));
     }
     .star {
       position: absolute;
-      width: 40px;
+      width: 30px;
+      height: 30px;
       animation: 
-        drop 4000ms linear,
-        sway ease-in-out infinite,
-        rotate 4s linear infinite;
+        drop 8s linear forwards,
+        sway 8s linear infinite,
+        rotate 10s linear infinite;
       opacity: 0;
-      transition: opacity 0.5s;
+      transition: opacity 0.5s ease-out;
+      z-index: 10;
+      pointer-events: auto;
+      filter: drop-shadow(0 0 5px rgba(255,255,255,0.8));
     }
+    .star.visible { opacity: 1; }
     .star.rainbow {
-      width: 45px;
+      width: 40px;
+      height: 40px;
+      filter: drop-shadow(0 0 10px rgba(255,100,255,0.6));
     }
     .star.diamond {
       width: 35px;
-    }
-    .star.visible {
-      opacity: 1;
+      height: 35px;
+      filter: drop-shadow(0 0 15px rgba(100,255,255,0.7));
     }
     @keyframes drop {
-      from { top: 0; }
-      to { top: 100%; }
+      from { top: -50px; opacity: 0; }
+      10% { opacity: 1; }
+      to { top: 100vh; }
     }
     @keyframes sway {
-      0% { transform: translateX(0) rotate(0deg); }
-      25% { transform: translateX(var(--sway-amplitude)) rotate(5deg); }
-      50% { transform: translateX(0) rotate(0deg); }
-      75% { transform: translateX(calc(-1 * var(--sway-amplitude))) rotate(-5deg); }
-      100% { transform: translateX(0) rotate(0deg); }
+      0% { transform: translateX(0); }
+      25% { transform: translateX(var(--sway-amplitude)); }
+      50% { transform: translateX(var(--sway-amplitude)); }
+      75% { transform: translateX(calc(-1 * var(--sway-amplitude))); }
+      100% { transform: translateX(calc(-1 * var(--sway-amplitude))); }
     }
     @keyframes rotate {
       0% { transform: rotate(0deg); }
@@ -80,11 +89,14 @@
       color: white;
       font-size: 20px;
       z-index: 20;
+      text-shadow: 0 0 5px #000;
+      padding: 8px 15px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 20px;
     }
-    #score-display { top: 10px; right: 10px; }
-    #timer-display { top: 10px; right: 150px; }
-    #stage-display { top: 10px; left: 10px; }
-
+    #score-display { top: 15px; right: 15px; }
+    #timer-display { top: 15px; right: 160px; }
+    #stage-display { top: 15px; left: 15px; }
     #message-overlay {
       position: absolute;
       top: 0; left: 0;
@@ -99,34 +111,29 @@
       text-align: center;
       padding: 20px;
     }
-    #message-overlay img {
-      width: 150px;
-      margin: 20px 0;
-    }
     #message-overlay button {
       font-size: 18px;
-      padding: 10px 20px;
-      margin-top: 20px;
-    }
-    #wisdom {
-      font-style: italic;
-      margin-top: 20px;
-      color: #ffcc00;
+      padding: 12px 25px;
+      margin: 10px;
+      background: linear-gradient(to bottom, #81d4fa, #4fc3f7);
+      color: #0a0e17;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <div id="game-area">
-    <img id="kokopelli" src="kokopelli.PNG" />
-    <img id="raccoon" src="raccoon.PNG" />
+    <img id="kokopelli" src="kokopelli.png" onerror="this.src='kokopelli.PNG'" alt="ココペリ">
     <div id="score-display">スコア: <span id="score">0</span></div>
     <div id="timer-display">残り: <span id="timer">30</span>秒</div>
     <div id="stage-display">ステージ: <span id="stage">1</span></div>
+    <img id="raccoon" src="raccoon.png" onerror="this.src='raccoon.PNG'" alt="アライグマ">
   </div>
 
   <div id="message-overlay">
     <div id="message-content"></div>
-    <div id="wisdom"></div>
     <button id="next-button">次へ</button>
     <button id="retry-button">もう一度</button>
   </div>
@@ -141,125 +148,91 @@
   <script>
     const stages = [
       { 
-        dropInterval: 2000, 
-        speed: 4000, 
-        goal: 15,
+        dropInterval: 2200,
+        speed: 6000,
+        goal: 10,
         starTypes: [
-          { type: 'normal', prob: 0.9, score: 1, sound: 'sound-catch' },
-          { type: 'rainbow', prob: 0.1, score: 2, sound: 'sound-catch-rainbow' }
+          { type: 'normal', prob: 0.8, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
+          { type: 'rainbow', prob: 0.2, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' }
         ]
       },
       { 
-        dropInterval: 1500, 
-        speed: 4000, 
+        dropInterval: 1800,
+        speed: 6000,
+        goal: 25,
+        starTypes: [
+          { type: 'normal', prob: 0.5, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
+          { type: 'rainbow', prob: 0.3, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
+          { type: 'diamond', prob: 0.2, score: 3, sound: 'sound-catch-diamond', img: 'diamond.png' }
+        ]
+      },
+      { 
+        dropInterval: 1500,
+        speed: 6000,
         goal: 40,
         starTypes: [
-          { type: 'normal', prob: 0.5, score: 1, sound: 'sound-catch' },
-          { type: 'rainbow', prob: 0.4, score: 2, sound: 'sound-catch-rainbow' },
-          { type: 'diamond', prob: 0.1, score: 3, sound: 'sound-catch-diamond' }
-        ]
-      },
-      { 
-        dropInterval: 1000, 
-        speed: 4000, 
-        goal: 60,
-        starTypes: [
-          { type: 'normal', prob: 0.1, score: 1, sound: 'sound-catch' },
-          { type: 'rainbow', prob: 0.5, score: 2, sound: 'sound-catch-rainbow' },
-          { type: 'diamond', prob: 0.4, score: 3, sound: 'sound-catch-diamond' }
+          { type: 'normal', prob: 0.3, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
+          { type: 'rainbow', prob: 0.4, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
+          { type: 'diamond', prob: 0.3, score: 3, sound: 'sound-catch-diamond', img: 'diamond.png' }
         ]
       }
     ];
 
-    const nativeWisdom = [
-      "大地は私たちの母なる大地である。彼女から生まれ、彼女に戻る。",
-      "すべての生き物はつながっている。私たちは皆、兄弟姉妹である。",
-      "自然は神の言葉である。静かに耳を傾けなさい。",
-      "私たちは地球から借りているものを、未来の世代に返さなければならない。",
-      "偉大なる精霊は円の中で働く。すべてのものは円を描いて動く。",
-      "あなたが歩くすべての場所は聖なる場所である。",
-      "子供たちに教えるときは、心で教えなさい。頭だけで教えてはいけない。",
-      "一人で歩く人は速く歩けるが、共に歩く人は遠くまで行ける。",
-      "雨が降らなければ、草は生えない。草が生えなければ、動物はいない。",
-      "私たちは地球を先祖から受け継いだのではなく、子供たちから借りているのだ。"
-    ];
-
-    let stage = 0, score = 0, time = 30, interval, timer, running = false;
-    let currentStage = stages[stage];
+    let stage = 0, score = 0, time = 30;
+    let interval, timer, running = false;
 
     const raccoon = document.getElementById('raccoon');
-    const kokopelli = document.getElementById('kokopelli');
     const area = document.getElementById('game-area');
     const scoreEl = document.getElementById('score');
     const timerEl = document.getElementById('timer');
     const stageEl = document.getElementById('stage');
     const message = document.getElementById('message-overlay');
     const messageContent = document.getElementById('message-content');
-    const wisdomEl = document.getElementById('wisdom');
     const nextButton = document.getElementById('next-button');
     const retryButton = document.getElementById('retry-button');
-    const pop = document.getElementById('sound-pop');
-    const clearBgm = document.getElementById('bgm-clear');
-    const failBgm = document.getElementById('bgm-fail');
-
-    function getRandomStarType() {
-      const rand = Math.random();
-      let cumulativeProb = 0;
-      
-      for (const starType of currentStage.starTypes) {
-        cumulativeProb += starType.prob;
-        if (rand <= cumulativeProb) {
-          return starType;
-        }
-      }
-      
-      return currentStage.starTypes[0]; // デフォルト
-    }
-
-    function getRandomWisdom() {
-      return nativeWisdom[Math.floor(Math.random() * nativeWisdom.length)];
-    }
 
     function spawnStar() {
-      const s = document.createElement('img');
-      const starType = getRandomStarType();
-      
-      s.src = `${starType.type}_star.PNG`;
-      s.className = `star visible ${starType.type}`;
-      
-      const swayAmplitude = 50 + Math.random() * 50;
-      const swayDuration = 2000 + Math.random() * 1000;
-      
-      s.style.animation = `
-        drop ${currentStage.speed}ms linear,
-        sway ${swayDuration}ms ease-in-out infinite,
-        rotate 4s linear infinite
-      `;
-      s.style.setProperty('--sway-amplitude', `${swayAmplitude}px`);
-      s.style.left = Math.random() * (window.innerWidth - 50) + 'px';
-      
-      area.appendChild(s);
-      pop.play();
-      
-      const check = setInterval(() => {
-        const sr = s.getBoundingClientRect();
-        const rr = raccoon.getBoundingClientRect();
-        
-        if (sr.bottom >= rr.top && sr.left < rr.right && sr.right > rr.left) {
-          score += starType.score;
-          scoreEl.textContent = score;
-          document.getElementById(starType.sound).play();
-          s.remove();
-          clearInterval(check);
-        } else if (sr.top > window.innerHeight) {
-          s.remove();
-          clearInterval(check);
+      const star = document.createElement('img');
+      const currentStage = stages[stage];
+      const rand = Math.random();
+      let cumulativeProb = 0;
+      let selectedType;
+
+      for (const type of currentStage.starTypes) {
+        cumulativeProb += type.prob;
+        if (rand <= cumulativeProb) {
+          selectedType = type;
+          break;
         }
-      }, 50);
+      }
+
+      star.src = selectedType.img;
+      star.onerror = () => star.src = selectedType.img.replace('.png', '.PNG');
+      star.className = `star visible ${selectedType.type}`;
+      
+      const swayAmplitude = 30;
+      star.style.cssText = `
+        left: ${Math.random() * (window.innerWidth - 50)}px;
+        --sway-amplitude: ${swayAmplitude}px;
+        animation: 
+          drop 8s linear forwards,
+          sway 8s linear infinite,
+          rotate 10s linear infinite;
+      `;
+      
+      area.appendChild(star);
+      document.getElementById('sound-pop').play();
+      
+      star.addEventListener('click', () => {
+        score += selectedType.score;
+        scoreEl.textContent = score;
+        document.getElementById(selectedType.sound).play();
+        star.style.opacity = '0';
+        setTimeout(() => star.remove(), 300);
+      });
     }
 
     function startStage() {
-      currentStage = stages[stage];
       score = 0;
       time = 30;
       scoreEl.textContent = score;
@@ -267,7 +240,7 @@
       stageEl.textContent = stage + 1;
       message.style.display = 'none';
       running = true;
-      interval = setInterval(spawnStar, currentStage.dropInterval);
+      interval = setInterval(spawnStar, stages[stage].dropInterval);
       timer = setInterval(() => {
         time--;
         timerEl.textContent = time;
@@ -279,44 +252,81 @@
       clearInterval(interval);
       clearInterval(timer);
       running = false;
-      if (score >= currentStage.goal) {
-        clearBgm.play();
-        messageContent.innerHTML = `<p>ステージ${stage + 1}クリア！</p>`;
-        nextButton.style.display = stage < 2 ? 'inline-block' : 'none';
-        wisdomEl.textContent = "";
+      if (score >= stages[stage].goal) {
+        document.getElementById('bgm-clear').play();
+        messageContent.innerHTML = `<h2>ステージ${stage + 1}クリア！</h2><p>${score}ポイント獲得！</p>`;
+        nextButton.style.display = stage < stages.length - 1 ? 'block' : 'none';
       } else {
-        failBgm.play();
-        messageContent.innerHTML = `<p>ステージ${stage + 1}失敗…</p>`;
-        wisdomEl.textContent = getRandomWisdom();
+        document.getElementById('bgm-fail').play();
+        messageContent.innerHTML = `<h2>ステージ${stage + 1}失敗…</h2><p>目標スコア: ${stages[stage].goal}</p><p>獲得スコア: ${score}</p>`;
         nextButton.style.display = 'none';
       }
-      retryButton.style.display = 'inline-block';
+      retryButton.style.display = 'block';
       message.style.display = 'flex';
     }
 
-    nextButton.onclick = () => { stage++; startStage(); };
-    retryButton.onclick = () => { if (stage > 2) stage = 0; startStage(); };
+    nextButton.addEventListener('click', () => { stage++; startStage(); });
+    retryButton.addEventListener('click', () => { startStage(); });
 
-    // スマホスワイプ操作
+    // タッチ操作
     let startX = null;
-    window.addEventListener('touchstart', e => startX = e.touches[0].clientX);
-    window.addEventListener('touchmove', e => {
-      if (!running || startX === null) return;
-      const deltaX = e.touches[0].clientX - startX;
-      const raccoonRect = raccoon.getBoundingClientRect();
-      const areaRect = area.getBoundingClientRect();
-      
-      let newLeft = raccoonRect.left + deltaX - areaRect.left;
-      newLeft = Math.max(0, Math.min(areaRect.width - raccoonRect.width, newLeft));
-      
-      raccoon.style.left = newLeft + 'px';
-      raccoon.style.transform = 'translateX(0)';
-      raccoon.style.bottom = '10%';
-      
+    let raccoonStartX = 0;
+
+    window.addEventListener('touchstart', (e) => {
+      if (!running) return;
       startX = e.touches[0].clientX;
+      raccoonStartX = raccoon.offsetLeft;
     });
 
-    window.onload = () => { stage = 0; startStage(); };
+    window.addEventListener('touchmove', (e) => {
+      if (!running || startX === null) return;
+      const touchX = e.touches[0].clientX;
+      const deltaX = touchX - startX;
+      let newLeft = raccoonStartX + deltaX;
+      
+      newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
+      raccoon.style.left = `${newLeft}px`;
+    });
+
+    window.addEventListener('touchend', () => {
+      startX = null;
+    });
+
+    // PC用マウス操作
+    let isDragging = false;
+    let mouseStartX = 0;
+    let mouseRaccoonStartX = 0;
+
+    raccoon.addEventListener('mousedown', (e) => {
+      if (!running) return;
+      isDragging = true;
+      mouseStartX = e.clientX;
+      mouseRaccoonStartX = raccoon.offsetLeft;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging || !running) return;
+      const deltaX = e.clientX - mouseStartX;
+      let newLeft = mouseRaccoonStartX + deltaX;
+      
+      newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
+      raccoon.style.left = `${newLeft}px`;
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    // 画像フォールバック
+    window.addEventListener('load', () => {
+      document.getElementById('kokopelli').onerror = function() {
+        this.src = 'kokopelli.PNG';
+      };
+      document.getElementById('raccoon').onerror = function() {
+        this.src = 'raccoon.PNG';
+      };
+      startStage();
+    });
   </script>
 </body>
 </html>
