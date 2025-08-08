@@ -18,7 +18,9 @@
       height: 100vh;
       background-image: url('background.PNG');
       background-size: cover;
-      background-position: center;
+      background-position: center
+      bottom: 20%;
+      overflow: hidden;
     }
     #kokopelli {
       position: absolute;
@@ -35,11 +37,13 @@
     }
     #raccoon {
       position: absolute;
-      bottom: 10%;
+      bottom: 15%;
       left: 50%;
       transform: translateX(-50%);
       width: 120px;
       z-index: 10;
+      animation: raccoonWalk 8s linear
+      infinite;
     }
     .star {
       position: absolute;
@@ -402,6 +406,7 @@
   </script>
 </body>
 </html>
+
 
 
 
