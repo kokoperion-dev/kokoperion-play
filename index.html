@@ -248,7 +248,7 @@
   function getRandomStarType() {
    const rand = Math.random();
    let cumulativeProb = 0;
-    
+   
    for (const starType of currentStage.starTypes) {
     cumulativeProb += starType.prob;
     if (rand <= cumulativeProb) {
@@ -261,18 +261,18 @@
   function getRandomWisdom() {
    return nativeWisdom[Math.floor(Math.random() * nativeWisdom.length)];
   }
-    
+   
   function spawnStar() {
    const star = document.createElement('img');
    const starType = getRandomStarType();
-    
+   
    star.src = starType.img;
    star.onerror = () => star.src = starType.img.replace('.PNG', '.png');
    star.className = `star visible ${starType.type}`;
-    
+   
    const swayAmplitude = 50 + Math.random() * 50;
    const swayDuration = 2000 + Math.random() * 1000;
-    
+   
    star.style.animation = `
     drop ${currentStage.speed}ms linear,
     sway ${swayDuration}ms ease-in-out infinite,
@@ -280,17 +280,17 @@
    `;
    star.style.setProperty('--sway-amplitude', `${swayAmplitude}px`);
    star.style.left = Math.random() * (window.innerWidth - 50) + 'px';
-    
+   
    area.appendChild(star);
    pop.play();
-    
+   
    const collisionCheck = setInterval(() => {
     const starRect = star.getBoundingClientRect();
     const raccoonRect = raccoon.getBoundingClientRect();
-     
+    
     if (starRect.bottom >= raccoonRect.top && 
-      starRect.left < raccoonRect.right && 
-      starRect.right > raccoonRect.left) {
+     starRect.left < raccoonRect.right && 
+     starRect.right > raccoonRect.left) {
      score += starType.score;
      scoreEl.textContent = score;
      document.getElementById(starType.sound).play();
@@ -312,11 +312,11 @@
    stageEl.textContent = stage + 1;
    message.style.display = 'none';
    running = true;
-    
+   
    // BGM再生
    mainBgm.currentTime = 0;
    mainBgm.play();
-    
+   
    interval = setInterval(spawnStar, currentStage.dropInterval);
    timer = setInterval(() => {
     time--;
@@ -329,10 +329,10 @@
    clearInterval(interval);
    clearInterval(timer);
    running = false;
-    
+   
    // BGM停止
    mainBgm.pause();
-    
+   
    if (score >= currentStage.goal) {
     clearBgm.play();
     messageContent.innerHTML = `<h2>ステージ${stage + 1} クリア！</h2><p>獲得スコア: ${score}</p>`;
@@ -351,18 +351,18 @@
   }
 
   function showStartScreen() {
-    messageContent.innerHTML = '<h2>ココペリオン<br>〜知恵の星を集めよう〜</h2><p>アライグマを操作して、空から降ってくる「知恵の星」を集めよう！</p>';
-    wisdomEl.textContent = getRandomWisdom();
-    startButton.style.display = 'block';
-    nextButton.style.display = 'none';
-    retryButton.style.display = 'none';
-    message.style.display = 'flex';
-    stage = 0; // ゲームを最初から始める
+   messageContent.innerHTML = '<h2>ココペリオン<br>〜知恵の星を集めよう〜</h2><p>アライグマを操作して、空から降ってくる「知恵の星」を集めよう！</p>';
+   wisdomEl.textContent = getRandomWisdom();
+   startButton.style.display = 'block';
+   nextButton.style.display = 'none';
+   retryButton.style.display = 'none';
+   message.style.display = 'flex';
+   stage = 0; // ゲームを最初から始める
   }
 
   // イベントリスナー
   startButton.addEventListener('click', () => {
-    startStage();
+   startStage();
   });
   nextButton.addEventListener('click', () => { stage++; startStage(); });
   retryButton.addEventListener('click', () => { stage = 0; startStage(); });
@@ -382,7 +382,7 @@
    const touchX = e.touches[0].clientX;
    const deltaX = touchX - touchStartX;
    let newLeft = raccoonStartX + deltaX;
-    
+   
    newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
    raccoon.style.left = `${newLeft}px`;
    raccoon.style.transform = 'translateX(0)';
@@ -405,7 +405,7 @@
    if (!isDragging || !running) return;
    const deltaX = e.clientX - mouseStartX;
    let newLeft = mouseRaccoonStartX + deltaX;
-    
+   
    newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
    raccoon.style.left = `${newLeft}px`;
   });
