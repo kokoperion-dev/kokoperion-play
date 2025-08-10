@@ -1,188 +1,157 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ココペリオン - 知恵の星を集めよう</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: black;
-      overflow: hidden;
-      font-family: sans-serif;
-    }
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>ココペリオン - ～星と森とココペリと～</title>
+ <style>
+  body {
+   margin: 0;
+   padding: 0;
+   background: black;
+   overflow: hidden;
+   font-family: sans-serif;
+  }
+  #game-area {
+   position: relative;
+   width: 100vw;
+   height: 100vh;
+   background-image: url('background.PNG');
+   background-size: cover;
+   background-position: center;
+  }
+  #kokopelli {
+   position: absolute;
+   top: 10%;
+   left: 5%;
+   width: 100px;
+   z-index: 10;
+   animation: float 3s ease-in-out infinite alternate;
+  }
+  @keyframes float {
+   0% { transform: translateX(0); }
+   50% { transform: translateX(20px); }
+   100% { transform: translateX(-20px); }
+  }
+  #raccoon {
+   position: absolute;
+   bottom: 10%;
+   left: 50%;
+   transform: translateX(-50%);
+   width: 120px;
+   z-index: 10;
+  }
+  .star {
+   position: absolute;
+   width: 40px;
+   animation: 
+    drop 4000ms linear,
+    sway ease-in-out infinite,
+    rotate 4s linear infinite;
+   opacity: 0;
+   transition: opacity 0.5s;
+   z-index: 5;
+   pointer-events: none;
+  }
+  .star.rainbow {
+   width: 45px;
+  }
+  .star.diamond {
+   width: 35px;
+  }
+  .star.visible {
+   opacity: 1;
+  }
+  @keyframes drop {
+   from { top: 0; }
+   to { top: 100%; }
+  }
+  @keyframes sway {
+   0% { transform: translateX(0) rotate(0deg); }
+   25% { transform: translateX(var(--sway-amplitude)) rotate(5deg); }
+   50% { transform: translateX(0) rotate(0deg); }
+   75% { transform: translateX(calc(-1 * var(--sway-amplitude))) rotate(-5deg); }
+   100% { transform: translateX(0) rotate(0deg); }
+  }
+  @keyframes rotate {
+   0% { transform: rotate(0deg); }
+   100% { transform: rotate(360deg); }
+  }
+  #score-display, #timer-display, #stage-display {
+   position: absolute;
+   color: white;
+   font-size: 20px;
+   z-index: 20;
+   background: rgba(0,0,0,0.5);
+   padding: 5px 10px;
+   border-radius: 10px;
+  }
+  #score-display { top: 10px; right: 10px; }
+  #timer-display { top: 10px; right: 150px; }
+  #stage-display { top: 10px; left: 10px; }
 
-    #game-area {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      background-image: url('background.PNG');
-      background-size: cover;
-      background-position: center;
-    }
-
-    #kokopelli {
-      position: absolute;
-      top: 10%;
-      left: 5%;
-      width: 100px;
-      z-index: 10;
-      animation: float 3s ease-in-out infinite alternate;
-    }
-
-    @keyframes float {
-      0% { transform: translateX(0); }
-      50% { transform: translateX(20px); }
-      100% { transform: translateX(-20px); }
-    }
-
-    #raccoon {
-      position: absolute;
-      bottom: 10%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 120px;
-      z-index: 10;
-    }
-
-    .star {
-      position: absolute;
-      width: 40px;
-      animation: 
-        drop 4000ms linear,
-        sway ease-in-out infinite,
-        rotate 4s linear infinite;
-      opacity: 0;
-      transition: opacity 0.5s;
-      z-index: 5;
-      pointer-events: none;
-    }
-
-    .star.rainbow {
-      width: 45px;
-    }
-
-    .star.diamond {
-      width: 35px;
-    }
-
-    .star.visible {
-      opacity: 1;
-    }
-
-    @keyframes drop {
-      from { top: 0; }
-      to { top: 100%; }
-    }
-
-    @keyframes sway {
-      0% { transform: translateX(0) rotate(0deg); }
-      25% { transform: translateX(var(--sway-amplitude)) rotate(5deg); }
-      50% { transform: translateX(0) rotate(0deg); }
-      75% { transform: translateX(calc(-1 * var(--sway-amplitude))) rotate(-5deg); }
-      100% { transform: translateX(0) rotate(0deg); }
-    }
-
-    @keyframes rotate {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    #score-display, #timer-display, #stage-display {
-      position: absolute;
-      color: white;
-      font-size: 20px;
-      background: rgba(0,0,0,0.5);
-      padding: 5px 10px;
-      border-radius: 10px;
-      pointer-events: none;
-    }
-
-    #score-display {
-      top: 10px;
-      right: 10px;
-      z-index: 9999; /* ← 最前面に表示されるよう調整 */
-    }
-
-    #timer-display {
-      top: 10px;
-      right: 150px;
-      z-index: 20;
-    }
-
-    #stage-display {
-      top: 10px;
-      left: 10px;
-      z-index: 20;
-    }
-
-    #message-overlay {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
-      color: white;
-      z-index: 100;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      text-align: center;
-      padding: 20px;
-    }
-
-    #message-overlay h2 {
-      color: #ffcc00;
-      margin-bottom: 10px;
-    }
-
-    #message-overlay button {
-      font-size: 18px;
-      padding: 10px 20px;
-      margin: 10px;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    #wisdom {
-      font-style: italic;
-      margin: 20px 0;
-      color: #ffcc00;
-      max-width: 80%;
-      line-height: 1.6;
-    }
-  </style>
+  #message-overlay {
+   position: absolute;
+   top: 0; left: 0;
+   width: 100%; height: 100%;
+   background: rgba(0,0,0,0.8);
+   color: white;
+   z-index: 100;
+   display: none;
+   justify-content: center;
+   align-items: center;
+   flex-direction: column;
+   text-align: center;
+   padding: 20px;
+  }
+  #message-overlay h2 {
+   color: #ffcc00;
+   margin-bottom: 10px;
+  }
+  #message-overlay button {
+   font-size: 18px;
+   padding: 10px 20px;
+   margin: 10px;
+   background: #4CAF50;
+   color: white;
+   border: none;
+   border-radius: 5px;
+   cursor: pointer;
+  }
+  #wisdom {
+   font-style: italic;
+   margin: 20px 0;
+   color: #ffcc00;
+   max-width: 80%;
+   line-height: 1.6;
+  }
+ </style>
 </head>
 <body>
-  <div id="game-area">
-    <img id="kokopelli" src="kokopelli.PNG" alt="ココペリ">
-    <img id="raccoon" src="raccoon.PNG" alt="アライグマ">
-    <div id="score-display">スコア: <span id="score">0</span></div>
-    <div id="timer-display">残り: <span id="timer">30</span>秒</div>
-    <div id="stage-display">ステージ: <span id="stage">1</span></div>
-  </div>
+ <div id="game-area">
+  <img id="kokopelli" src="kokopelli.PNG" alt="ココペリ">
+  <img id="raccoon" src="raccoon.PNG" alt="アライグマ">
+  <div id="score-display">スコア: <span id="score">0</span></div>
+  <div id="timer-display">残り: <span id="timer">30</span>秒</div>
+  <div id="stage-display">ステージ: <span id="stage">1</span></div>
+ </div>
 
-  <div id="message-overlay">
-    <div id="message-content"></div>
-    <div id="wisdom"></div>
-    <button id="next-button">次へ</button>
-    <button id="retry-button">もう一度</button>
-  </div>
+ <div id="message-overlay">
+  <div id="message-content"></div>
+  <div id="wisdom"></div>
+  <button id="start-button" style="display:none;">スタート</button>
+  <button id="next-button" style="display:none;">次へ</button>
+  <button id="retry-button" style="display:none;">もう一度</button>
+ </div>
 
-  <!-- Audio elements -->
-  <audio id="sound-pop" src="star_pop.mp3"></audio>
-  <audio id="sound-catch" src="star_catch.mp3"></audio>
-  <audio id="sound-catch-rainbow" src="star_catch_rainbow.mp3"></audio>
-  <audio id="sound-catch-diamond" src="star_catch_diamond.mp3"></audio>
-  <audio id="bgm-clear" src="clear_bgm.mp3"></audio>
-  <audio id="bgm-fail" src="fail_bgm.mp3"></audio>
-  <audio id="bgm-main" src="main_bgm.mp3" loop></audio>
+ <audio id="sound-pop" src="star_pop.mp3"></audio>
+ <audio id="sound-catch" src="star_catch.mp3"></audio>
+ <audio id="sound-catch-rainbow" src="star_catch_rainbow.mp3"></audio>
+ <audio id="sound-catch-diamond" src="star_catch_diamond.mp3"></audio>
+ <audio id="bgm-clear" src="clear_bgm.mp3"></audio>
+ <audio id="bgm-fail" src="fail_bgm.mp3"></audio>
+ <audio id="bgm-main" src="main_bgm.mp3" loop></audio>
 
- 
  <script>
   const stages = [
    { 
@@ -448,13 +417,5 @@
   // ページ読み込み時にスタート画面を表示
   window.addEventListener('load', showStartScreen);
  </script>
-
-
-
-
-
-
-
-
 </body>
 </html>
