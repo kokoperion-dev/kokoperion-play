@@ -12,6 +12,7 @@
       overflow: hidden;
       font-family: sans-serif;
     }
+
     #game-area {
       position: relative;
       width: 100vw;
@@ -20,6 +21,7 @@
       background-size: cover;
       background-position: center;
     }
+
     #kokopelli {
       position: absolute;
       top: 10%;
@@ -28,11 +30,13 @@
       z-index: 10;
       animation: float 3s ease-in-out infinite alternate;
     }
+
     @keyframes float {
       0% { transform: translateX(0); }
       50% { transform: translateX(20px); }
       100% { transform: translateX(-20px); }
     }
+
     #raccoon {
       position: absolute;
       bottom: 10%;
@@ -41,6 +45,7 @@
       width: 120px;
       z-index: 10;
     }
+
     .star {
       position: absolute;
       width: 40px;
@@ -53,19 +58,24 @@
       z-index: 5;
       pointer-events: none;
     }
+
     .star.rainbow {
       width: 45px;
     }
+
     .star.diamond {
       width: 35px;
     }
+
     .star.visible {
       opacity: 1;
     }
+
     @keyframes drop {
       from { top: 0; }
       to { top: 100%; }
     }
+
     @keyframes sway {
       0% { transform: translateX(0) rotate(0deg); }
       25% { transform: translateX(var(--sway-amplitude)) rotate(5deg); }
@@ -73,22 +83,39 @@
       75% { transform: translateX(calc(-1 * var(--sway-amplitude))) rotate(-5deg); }
       100% { transform: translateX(0) rotate(0deg); }
     }
+
     @keyframes rotate {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
     #score-display, #timer-display, #stage-display {
       position: absolute;
       color: white;
       font-size: 20px;
-      z-index: 20;
       background: rgba(0,0,0,0.5);
       padding: 5px 10px;
       border-radius: 10px;
+      pointer-events: none;
     }
-    #score-display { top: 10px; right: 10px; }
-    #timer-display { top: 10px; right: 150px; }
-    #stage-display { top: 10px; left: 10px; }
+
+    #score-display {
+      top: 10px;
+      right: 10px;
+      z-index: 9999; /* ← 最前面に表示されるよう調整 */
+    }
+
+    #timer-display {
+      top: 10px;
+      right: 150px;
+      z-index: 20;
+    }
+
+    #stage-display {
+      top: 10px;
+      left: 10px;
+      z-index: 20;
+    }
 
     #message-overlay {
       position: absolute;
@@ -104,10 +131,12 @@
       text-align: center;
       padding: 20px;
     }
+
     #message-overlay h2 {
       color: #ffcc00;
       margin-bottom: 10px;
     }
+
     #message-overlay button {
       font-size: 18px;
       padding: 10px 20px;
@@ -118,6 +147,7 @@
       border-radius: 5px;
       cursor: pointer;
     }
+
     #wisdom {
       font-style: italic;
       margin: 20px 0;
@@ -143,6 +173,7 @@
     <button id="retry-button">もう一度</button>
   </div>
 
+  <!-- Audio elements -->
   <audio id="sound-pop" src="star_pop.mp3"></audio>
   <audio id="sound-catch" src="star_catch.mp3"></audio>
   <audio id="sound-catch-rainbow" src="star_catch_rainbow.mp3"></audio>
@@ -151,260 +182,279 @@
   <audio id="bgm-fail" src="fail_bgm.mp3"></audio>
   <audio id="bgm-main" src="main_bgm.mp3" loop></audio>
 
-  <script>
-    const stages = [
-      { 
-        dropInterval: 2000, 
-        speed: 4000, 
-        goal: 12,
-        starTypes: [
-          { type: 'normal', prob: 0.9, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
-          { type: 'rainbow', prob: 0.1, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' }
-        ]
-      },
-      { 
-        dropInterval: 1500, 
-        speed: 4000, 
-        goal: 25,
-        starTypes: [
-          { type: 'normal', prob: 0.5, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
-          { type: 'rainbow', prob: 0.4, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
-          { type: 'diamond', prob: 0.1, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' }
-        ]
-      },
-      { 
-        dropInterval: 1000, 
-        speed: 4000, 
-        goal: 55,
-        starTypes: [
-          { type: 'normal', prob: 0.1, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
-          { type: 'rainbow', prob: 0.5, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
-          { type: 'diamond', prob: 0.4, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' }
-        ]
-      }
-    ];
+ 
+ <script>
+  const stages = [
+   { 
+    dropInterval: 2000, 
+    speed: 4000, 
+    goal: 12,
+    starTypes: [
+     { type: 'normal', prob: 0.9, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
+     { type: 'rainbow', prob: 0.1, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' }
+    ]
+   },
+   { 
+    dropInterval: 1500, 
+    speed: 4000, 
+    goal: 25,
+    starTypes: [
+     { type: 'normal', prob: 0.5, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
+     { type: 'rainbow', prob: 0.4, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
+     { type: 'diamond', prob: 0.1, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' }
+    ]
+   },
+   { 
+    dropInterval: 1000, 
+    speed: 4000, 
+    goal: 55,
+    starTypes: [
+     { type: 'normal', prob: 0.1, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
+     { type: 'rainbow', prob: 0.5, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
+     { type: 'diamond', prob: 0.4, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' }
+    ]
+   }
+  ];
 
-    const nativeWisdom = [
-      "ラムビー族の格言: 知識ではなく、智恵を求めよ。知識は産物だが、智恵は未来をもたらす。",
-      "チェロキー族の格言: 日と夜、季節、星、太陽。その移ろいを見れば、ひとより偉大な何かの存在を思わずにはいられない。",
-      "ショショネ族の格言: 自分より偉大なものには、つねに畏敬の念をもて。",
-      "ホピ族の格言: 善人にも、悪人にも雨は降り、陽は昇る。",
-      "ラコタ族の格言: 創世記はいまも続いている。",
-      "アパッチ族の格言: まっすぐに、しゃべれば、光線のように、こころに届く。",
-      "ホピ族の格言: かんしゃくを起こすと、友人を失う。嘘をつくと、自分自身を失う。",
-      "オハマ族の伝承: 親切とは、言葉をつつしみ、人を傷つけないように心がけることだ。",
-      "ホピ族の格言: 慎ましく食べ、慎んでしゃべる。そして誰も傷つけない。",
-      "ソーク族の格言: 私の前を歩くな、私が従うとは限らない。私の後を歩くな、私が導くとは限らない。私と共に歩け、私たちはひとつなのだから。",
-      "ミンカス族の格言: 感謝する理由がみつからなければ落ち度はあなた自身にある。",
-      "ダコタ族の格言: 歩いた足跡でひとは永遠に知られる。",
-      "ナバホ族の格言: 思考は矢のように放たれたら、的を射る。注意しないと自分の放った矢で倒れることになる。",
-      "ホピ族の格言: 怒りは自分に盛る毒。",
-      "ドゥワミッシュ族の格言: 死は存在しない生きる世界が変わるだけだ。",
-      "シャイアン族の格言: 目で判断せずに、こころで判断しろ。",
-      "オマハ族の格言: 過ちを見てそれを正そうとしなければ過ちを犯した者と同罪だ。",
-      "ナバホ族: 素晴らしい夢を見てそれを行動に移せ。",
-      "チェロキー族の格言: 昨日のことで今日を消耗させてはならない。",
-      "オノンダガ族: 秘密などというものはない。謎などというものもない。それらはただの常識にすぎない。",
-      "ホピ族の格言: 泣くことをおそれずに。泣くことは、悲しみにあふれたあなたのこころを解き放つ。",
-      "オグララ・ラコタ族の格言: 真実の言葉とは、深くこころに沈んでそこにとどまるもの。",
-      "オクラホマ族の格言: 飢えた人間は狼と一緒でも食べる。",
-      "ホピ族の格言: 1本の指では小石すら持ち上げられぬ。",
-      "アパッチ族の格言: 見た目のよい男というものが、ただ顔の造作がよいだけのこともある。",
-      "オグララ・ラコタ族の格言: 宇宙はわれわれひとりひとりのなかにある。",
-      "ラコタ族の格言: 貧乏は謙遜の首を縄で絞めながら、神と人間にたいする無礼を飼育する。",
-      "モホーク族の格言: 人生はあげることと、もらうことの両方である。",
-      "パウニー族の格言: 宗教はひとつのこらず神のもとに帰るための足がかりにすぎない。",
-      "オマハ族の格言: いのちあるものすべてにいたわりを。",
-      "ドゥワミッシュ族の格言: わたしが愛するのは、お金への愛に生きていない人たち。",
-      "アラバホ族の格言: あぶく銭は怠け者をつくる。",
-      "ソーク族の格言: 師は教えることでまた学んでいる。",
-      "アパッチ族の格言: 神の名は無意味、世界にとってほんとうの神はあいなのだ。",
-      "アラバホ族の格言: 少しずつ少しずつ行けるところまで進む。",
-      "ポウニー族の格言: 死はつねに季節はずれにやってくる。",
-      "スー族の格言: ひとびとのこころに真の平和が宿るまで、国と国との間に平和はやってこない。",
-      "イロコイ族の格言: どんなことも7世代先まで考えて決めなければならない。"
-    ];
+  const nativeWisdom = [
+   "ラムビー族の格言: 知識ではなく、智恵を求めよ。知識は産物だが、智恵は未来をもたらす。",
+   "チェロキー族の格言: 日と夜、季節、星、太陽。その移ろいを見れば、ひとより偉大な何かの存在を思わずにはいられない。",
+   "ショショネ族の格言: 自分より偉大なものには、つねに畏敬の念をもて。",
+   "ホピ族の格言: 善人にも、悪人にも雨は降り、陽は昇る。",
+   "ラコタ族の格言: 創世記はいまも続いている。",
+   "アパッチ族の格言: まっすぐに、しゃべれば、光線のように、こころに届く。",
+   "ホピ族の格言: かんしゃくを起こすと、友人を失う。嘘をつくと、自分自身を失う。",
+   "オハマ族の伝承: 親切とは、言葉をつつしみ、人を傷つけないように心がけることだ。",
+   "ホピ族の格言: 慎ましく食べ、慎んでしゃべる。そして誰も傷つけない。",
+   "ソーク族の格言: 私の前を歩くな、私が従うとは限らない。私の後を歩くな、私が導くとは限らない。私と共に歩け、私たちはひとつなのだから。",
+   "ミンカス族の格言: 感謝する理由がみつからなければ落ち度はあなた自身にある。",
+   "ダコタ族の格言: 歩いた足跡でひとは永遠に知られる。",
+   "ナバホ族の格言: 思考は矢のように放たれたら、的を射る。注意しないと自分の放った矢で倒れることになる。",
+   "ホピ族の格言: 怒りは自分に盛る毒。",
+   "ドゥワミッシュ族の格言: 死は存在しない生きる世界が変わるだけだ。",
+   "シャイアン族の格言: 目で判断せずに、こころで判断しろ。",
+   "オマハ族の格言: 過ちを見てそれを正そうとしなければ過ちを犯した者と同罪だ。",
+   "ナバホ族: 素晴らしい夢を見てそれを行動に移せ。",
+   "チェロキー族の格言: 昨日のことで今日を消耗させてはならない。",
+   "オノンダガ族: 秘密などというものはない。謎などというものもない。それらはただの常識にすぎない。",
+   "ホピ族の格言: 泣くことをおそれずに。泣くことは、悲しみにあふれたあなたのこころを解き放つ。",
+   "オグララ・ラコタ族の格言: 真実の言葉とは、深くこころに沈んでそこにとどまるもの。",
+   "オクラホマ族の格言: 飢えた人間は狼と一緒でも食べる。",
+   "ホピ族の格言: 1本の指では小石すら持ち上げられぬ。",
+   "アパッチ族の格言: 見た目のよい男というものが、ただ顔の造作がよいだけのこともある。",
+   "オグララ・ラコタ族の格言: 宇宙はわれわれひとりひとりのなかにある。",
+   "ラコタ族の格言: 貧乏は謙遜の首を縄で絞めながら、神と人間にたいする無礼を飼育する。",
+   "モホーク族の格言: 人生はあげることと、もらうことの両方である。",
+   "パウニー族の格言: 宗教はひとつのこらず神のもとに帰るための足がかりにすぎない。",
+   "オマハ族の格言: いのちあるものすべてにいたわりを。",
+   "ドゥワミッシュ族の格言: わたしが愛するのは、お金への愛に生きていない人たち。",
+   "アラバホ族の格言: あぶく銭は怠け者をつくる。",
+   "ソーク族の格言: 師は教えることでまた学んでいる。",
+   "アパッチ族の格言: 神の名は無意味、世界にとってほんとうの神はあいなのだ。",
+   "アラバホ族の格言: 少しずつ少しずつ行けるところまで進む。",
+   "ポウニー族の格言: 死はつねに季節はずれにやってくる。",
+   "スー族の格言: ひとびとのこころに真の平和が宿るまで、国と国との間に平和はやってこない。",
+   "イロコイ族の格言: どんなことも7世代先まで考えて決めなければならない。"
+  ];
 
-    let stage = 0, score = 0, time = 30, interval, timer, running = false;
-    let currentStage = stages[stage];
+  let stage = 0, score = 0, time = 30, interval, timer, running = false;
+  let currentStage = stages[stage];
 
-    const raccoon = document.getElementById('raccoon');
-    const area = document.getElementById('game-area');
-    const scoreEl = document.getElementById('score');
-    const timerEl = document.getElementById('timer');
-    const stageEl = document.getElementById('stage');
-    const message = document.getElementById('message-overlay');
-    const messageContent = document.getElementById('message-content');
-    const wisdomEl = document.getElementById('wisdom');
-    const nextButton = document.getElementById('next-button');
-    const retryButton = document.getElementById('retry-button');
-    const pop = document.getElementById('sound-pop');
-    const clearBgm = document.getElementById('bgm-clear');
-    const failBgm = document.getElementById('bgm-fail');
-    const mainBgm = document.getElementById('bgm-main');
+  const raccoon = document.getElementById('raccoon');
+  const area = document.getElementById('game-area');
+  const scoreEl = document.getElementById('score');
+  const timerEl = document.getElementById('timer');
+  const stageEl = document.getElementById('stage');
+  const message = document.getElementById('message-overlay');
+  const messageContent = document.getElementById('message-content');
+  const wisdomEl = document.getElementById('wisdom');
+  const startButton = document.getElementById('start-button');
+  const nextButton = document.getElementById('next-button');
+  const retryButton = document.getElementById('retry-button');
+  const pop = document.getElementById('sound-pop');
+  const clearBgm = document.getElementById('bgm-clear');
+  const failBgm = document.getElementById('bgm-fail');
+  const mainBgm = document.getElementById('bgm-main');
 
-    function getRandomStarType() {
-      const rand = Math.random();
-      let cumulativeProb = 0;
-      
-      for (const starType of currentStage.starTypes) {
-        cumulativeProb += starType.prob;
-        if (rand <= cumulativeProb) {
-          return starType;
-        }
-      }
-      return currentStage.starTypes[0];
+  function getRandomStarType() {
+   const rand = Math.random();
+   let cumulativeProb = 0;
+    
+   for (const starType of currentStage.starTypes) {
+    cumulativeProb += starType.prob;
+    if (rand <= cumulativeProb) {
+     return starType;
     }
+   }
+   return currentStage.starTypes[0];
+  }
 
-    function getRandomWisdom() {
-      return nativeWisdom[Math.floor(Math.random() * nativeWisdom.length)];
+  function getRandomWisdom() {
+   return nativeWisdom[Math.floor(Math.random() * nativeWisdom.length)];
+  }
+    
+  function spawnStar() {
+   const star = document.createElement('img');
+   const starType = getRandomStarType();
+    
+   star.src = starType.img;
+   star.onerror = () => star.src = starType.img.replace('.PNG', '.png');
+   star.className = `star visible ${starType.type}`;
+    
+   const swayAmplitude = 50 + Math.random() * 50;
+   const swayDuration = 2000 + Math.random() * 1000;
+    
+   star.style.animation = `
+    drop ${currentStage.speed}ms linear,
+    sway ${swayDuration}ms ease-in-out infinite,
+    rotate 4s linear infinite
+   `;
+   star.style.setProperty('--sway-amplitude', `${swayAmplitude}px`);
+   star.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+    
+   area.appendChild(star);
+   pop.play();
+    
+   const collisionCheck = setInterval(() => {
+    const starRect = star.getBoundingClientRect();
+    const raccoonRect = raccoon.getBoundingClientRect();
+     
+    if (starRect.bottom >= raccoonRect.top && 
+      starRect.left < raccoonRect.right && 
+      starRect.right > raccoonRect.left) {
+     score += starType.score;
+     scoreEl.textContent = score;
+     document.getElementById(starType.sound).play();
+     star.remove();
+     clearInterval(collisionCheck);
+    } else if (starRect.top > window.innerHeight) {
+     star.remove();
+     clearInterval(collisionCheck);
     }
+   }, 50);
+  }
 
-    function spawnStar() {
-      const star = document.createElement('img');
-      const starType = getRandomStarType();
-      
-      star.src = starType.img;
-      star.onerror = () => star.src = starType.img.replace('.PNG', '.png');
-      star.className = `star visible ${starType.type}`;
-      
-      const swayAmplitude = 50 + Math.random() * 50;
-      const swayDuration = 2000 + Math.random() * 1000;
-      
-      star.style.animation = `
-        drop ${currentStage.speed}ms linear,
-        sway ${swayDuration}ms ease-in-out infinite,
-        rotate 4s linear infinite
-      `;
-      star.style.setProperty('--sway-amplitude', `${swayAmplitude}px`);
-      star.style.left = Math.random() * (window.innerWidth - 50) + 'px';
-      
-      area.appendChild(star);
-      pop.play();
-      
-      const collisionCheck = setInterval(() => {
-        const starRect = star.getBoundingClientRect();
-        const raccoonRect = raccoon.getBoundingClientRect();
-        
-        if (starRect.bottom >= raccoonRect.top && 
-            starRect.left < raccoonRect.right && 
-            starRect.right > raccoonRect.left) {
-          score += starType.score;
-          scoreEl.textContent = score;
-          document.getElementById(starType.sound).play();
-          star.remove();
-          clearInterval(collisionCheck);
-        } else if (starRect.top > window.innerHeight) {
-          star.remove();
-          clearInterval(collisionCheck);
-        }
-      }, 50);
-    }
+  function startStage() {
+   currentStage = stages[stage];
+   score = 0;
+   time = 30;
+   scoreEl.textContent = score;
+   timerEl.textContent = time;
+   stageEl.textContent = stage + 1;
+   message.style.display = 'none';
+   running = true;
+    
+   // BGM再生
+   mainBgm.currentTime = 0;
+   mainBgm.play();
+    
+   interval = setInterval(spawnStar, currentStage.dropInterval);
+   timer = setInterval(() => {
+    time--;
+    timerEl.textContent = time;
+    if (time <= 0) endStage();
+   }, 1000);
+  }
 
-    function startStage() {
-      currentStage = stages[stage];
-      score = 0;
-      time = 30;
-      scoreEl.textContent = score;
-      timerEl.textContent = time;
-      stageEl.textContent = stage + 1;
-      message.style.display = 'none';
-      running = true;
-      
-      // BGM再生
-      mainBgm.currentTime = 0;
-      mainBgm.play();
-      
-      interval = setInterval(spawnStar, currentStage.dropInterval);
-      timer = setInterval(() => {
-        time--;
-        timerEl.textContent = time;
-        if (time <= 0) endStage();
-      }, 1000);
-    }
+  function endStage() {
+   clearInterval(interval);
+   clearInterval(timer);
+   running = false;
+    
+   // BGM停止
+   mainBgm.pause();
+    
+   if (score >= currentStage.goal) {
+    clearBgm.play();
+    messageContent.innerHTML = `<h2>ステージ${stage + 1} クリア！</h2><p>獲得スコア: ${score}</p>`;
+    nextButton.style.display = stage < stages.length - 1 ? 'block' : 'none';
+    wisdomEl.textContent = getRandomWisdom();
+    startButton.style.display = 'none';
+   } else {
+    failBgm.play();
+    messageContent.innerHTML = `<h2>ステージ${stage + 1} 失敗</h2><p>目標スコア: ${currentStage.goal}</p>`;
+    wisdomEl.textContent = getRandomWisdom();
+    nextButton.style.display = 'none';
+    startButton.style.display = 'none';
+   }
+   retryButton.style.display = 'block';
+   message.style.display = 'flex';
+  }
 
-    function endStage() {
-      clearInterval(interval);
-      clearInterval(timer);
-      running = false;
-      
-      // BGM停止
-      mainBgm.pause();
-      
-      if (score >= currentStage.goal) {
-        clearBgm.play();
-        messageContent.innerHTML = `<h2>ステージ${stage + 1} クリア！</h2><p>獲得スコア: ${score}</p>`;
-        nextButton.style.display = stage < stages.length - 1 ? 'block' : 'none';
-        wisdomEl.textContent = getRandomWisdom();
-      } else {
-        failBgm.play();
-        messageContent.innerHTML = `<h2>ステージ${stage + 1} 失敗</h2><p>目標スコア: ${currentStage.goal}</p>`;
-        wisdomEl.textContent = getRandomWisdom();
-        nextButton.style.display = 'none';
-      }
-      retryButton.style.display = 'block';
-      message.style.display = 'flex';
-    }
+  function showStartScreen() {
+    messageContent.innerHTML = '<h2>ココペリオン<br>〜知恵の星を集めよう〜</h2><p>アライグマを操作して、空から降ってくる「知恵の星」を集めよう！</p>';
+    wisdomEl.textContent = getRandomWisdom();
+    startButton.style.display = 'block';
+    nextButton.style.display = 'none';
+    retryButton.style.display = 'none';
+    message.style.display = 'flex';
+    stage = 0; // ゲームを最初から始める
+  }
 
-    // イベントリスナー
-    nextButton.addEventListener('click', () => { stage++; startStage(); });
-    retryButton.addEventListener('click', startStage);
+  // イベントリスナー
+  startButton.addEventListener('click', () => {
+    startStage();
+  });
+  nextButton.addEventListener('click', () => { stage++; startStage(); });
+  retryButton.addEventListener('click', () => { stage = 0; startStage(); });
 
-    // タッチ操作
-    let touchStartX = 0;
-    let raccoonStartX = 0;
+  // タッチ操作
+  let touchStartX = 0;
+  let raccoonStartX = 0;
 
-    window.addEventListener('touchstart', (e) => {
-      if (!running) return;
-      touchStartX = e.touches[0].clientX;
-      raccoonStartX = raccoon.offsetLeft;
-    });
+  window.addEventListener('touchstart', (e) => {
+   if (!running) return;
+   touchStartX = e.touches[0].clientX;
+   raccoonStartX = raccoon.offsetLeft;
+  });
 
-    window.addEventListener('touchmove', (e) => {
-      if (!running) return;
-      const touchX = e.touches[0].clientX;
-      const deltaX = touchX - touchStartX;
-      let newLeft = raccoonStartX + deltaX;
-      
-      newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
-      raccoon.style.left = `${newLeft}px`;
-      raccoon.style.transform = 'translateX(0)';
-    });
+  window.addEventListener('touchmove', (e) => {
+   if (!running) return;
+   const touchX = e.touches[0].clientX;
+   const deltaX = touchX - touchStartX;
+   let newLeft = raccoonStartX + deltaX;
+    
+   newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
+   raccoon.style.left = `${newLeft}px`;
+   raccoon.style.transform = 'translateX(0)';
+  });
 
-    // PC用マウス操作
-    let isDragging = false;
-    let mouseStartX = 0;
-    let mouseRaccoonStartX = 0;
+  // PC用マウス操作
+  let isDragging = false;
+  let mouseStartX = 0;
+  let mouseRaccoonStartX = 0;
 
-    raccoon.addEventListener('mousedown', (e) => {
-      if (!running) return;
-      isDragging = true;
-      mouseStartX = e.clientX;
-      mouseRaccoonStartX = raccoon.offsetLeft;
-      e.preventDefault();
-    });
+  raccoon.addEventListener('mousedown', (e) => {
+   if (!running) return;
+   isDragging = true;
+   mouseStartX = e.clientX;
+   mouseRaccoonStartX = raccoon.offsetLeft;
+   e.preventDefault();
+  });
 
-    window.addEventListener('mousemove', (e) => {
-      if (!isDragging || !running) return;
-      const deltaX = e.clientX - mouseStartX;
-      let newLeft = mouseRaccoonStartX + deltaX;
-      
-      newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
-      raccoon.style.left = `${newLeft}px`;
-    });
+  window.addEventListener('mousemove', (e) => {
+   if (!isDragging || !running) return;
+   const deltaX = e.clientX - mouseStartX;
+   let newLeft = mouseRaccoonStartX + deltaX;
+    
+   newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
+   raccoon.style.left = `${newLeft}px`;
+  });
 
-    window.addEventListener('mouseup', () => {
-      isDragging = false;
-    });
+  window.addEventListener('mouseup', () => {
+   isDragging = false;
+  });
 
-    // ゲーム開始
-    window.addEventListener('load', startStage);
-  </script>
+  // ページ読み込み時にスタート画面を表示
+  window.addEventListener('load', showStartScreen);
+ </script>
+
+
+
+
+
+
+
+
 </body>
 </html>
-
-
-
-
-
-
