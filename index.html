@@ -68,9 +68,9 @@
   /* 第3ステージ専用のゆるやかなアニメーション */
   .star.gentle-drop {
     animation:
-    drop 4000ms linear, /* 落下速度は元のまま */
-    gentleSway 3s ease-in-out infinite alternate, /* ゆるやかな揺れを追加 */
-    rotate 4s linear infinite; /* 回転アニメーションも追加 */
+    drop 4000ms linear,
+    gentleSway 3s ease-in-out infinite alternate,
+    rotate 4s linear infinite;
   }
   
   @keyframes drop {
@@ -290,10 +290,8 @@
 
    // ステージに応じてアニメーションを切り替え
    if (currentStage.gentle) {
-    // 第3ステージ用のアニメーション
     star.classList.add('gentle-drop');
    } else {
-    // 通常ステージ用のアニメーション
     const swayAmplitude = 50 + Math.random() * 50;
     star.classList.add('normal-drop');
     star.style.setProperty('--sway-amplitude', `${swayAmplitude}px`);
@@ -350,7 +348,6 @@
    clearInterval(timer);
    running = false;
 
-   // BGM停止
    mainBgm.pause();
 
    if (score >= currentStage.goal) {
@@ -377,15 +374,21 @@
    nextButton.style.display = 'none';
    retryButton.style.display = 'none';
    message.style.display = 'flex';
-   stage = 0; // ゲームを最初から始める
+   stage = 0;
   }
 
   // イベントリスナー
   startButton.addEventListener('click', () => {
    startStage();
   });
-  nextButton.addEventListener('click', () => { stage++; startStage(); });
-  retryButton.addEventListener('click', () => { showStartScreen(); });
+  nextButton.addEventListener('click', () => {
+   stage++;
+   startStage();
+  });
+  // 修正箇所
+  retryButton.addEventListener('click', () => {
+   startStage(); // 失敗したステージを再開
+  });
 
   // タッチ操作
   let touchStartX = 0;
