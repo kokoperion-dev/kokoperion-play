@@ -44,10 +44,6 @@
   .star {
    position: absolute;
    width: 40px;
-   animation: 
-    drop 4000ms linear,
-    sway ease-in-out infinite,
-    rotate 4s linear infinite;
    opacity: 0;
    transition: opacity 0.5s;
    z-index: 5;
@@ -61,6 +57,20 @@
   }
   .star.visible {
    opacity: 1;
+  }
+  /* 通常ステージのアニメーション */
+  .star.normal-drop {
+   animation:
+    drop 4000ms linear,
+    sway ease-in-out infinite,
+    rotate 4s linear infinite;
+  }
+  /* 第3ステージ専用のゆるやかなアニメーション */
+  .star.gentle-drop {
+    animation:
+    gentleDrop var(--star-speed) linear,
+    gentleSway var(--sway-duration) ease-in-out infinite,
+    rotate 4s linear infinite;
   }
   @keyframes drop {
    from { top: 0; }
@@ -77,6 +87,17 @@
    0% { transform: rotate(0deg); }
    100% { transform: rotate(360deg); }
   }
+  /* 第3ステージ用の新しいアニメーション */
+  @keyframes gentleDrop {
+    from { top: 0; }
+    to { top: 100%; }
+  }
+  @keyframes gentleSway {
+    0% { transform: translateX(-15px) rotate(0deg); }
+    50% { transform: translateX(15px) rotate(5deg); }
+    100% { transform: translateX(-15px) rotate(-5deg); }
+  }
+  
   #score-display, #timer-display, #stage-display {
    position: absolute;
    color: white;
@@ -154,18 +175,18 @@
 
  <script>
   const stages = [
-   { 
-    dropInterval: 2000, 
-    speed: 4000, 
+   {
+    dropInterval: 2000,
+    speed: 4000,
     goal: 12,
     starTypes: [
      { type: 'normal', prob: 0.9, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
      { type: 'rainbow', prob: 0.1, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' }
     ]
    },
-   { 
-    dropInterval: 1500, 
-    speed: 4000, 
+   {
+    dropInterval: 1500,
+    speed: 4000,
     goal: 25,
     starTypes: [
      { type: 'normal', prob: 0.5, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
@@ -173,15 +194,16 @@
      { type: 'diamond', prob: 0.1, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' }
     ]
    },
-   { 
-    dropInterval: 1000, 
-    speed: 4000, 
+   {
+    dropInterval: 1000,
+    speed: 6000, // 落下速度を遅くして、よりゆるやかな演出に
     goal: 55,
     starTypes: [
      { type: 'normal', prob: 0.1, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
      { type: 'rainbow', prob: 0.5, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
      { type: 'diamond', prob: 0.4, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' }
-    ]
+    ],
+    gentle: true // 第3ステージ専用のフラグ
    }
   ];
 
@@ -248,7 +270,7 @@
   function getRandomStarType() {
    const rand = Math.random();
    let cumulativeProb = 0;
-   
+
    for (const starType of currentStage.starTypes) {
     cumulativeProb += starType.prob;
     if (rand <= cumulativeProb) {
@@ -261,35 +283,41 @@
   function getRandomWisdom() {
    return nativeWisdom[Math.floor(Math.random() * nativeWisdom.length)];
   }
-   
+
   function spawnStar() {
    const star = document.createElement('img');
    const starType = getRandomStarType();
-   
+
    star.src = starType.img;
    star.onerror = () => star.src = starType.img.replace('.PNG', '.png');
    star.className = `star visible ${starType.type}`;
+
+   // ステージに応じてアニメーションを切り替え
+   if (currentStage.gentle) {
+    // 第3ステージ用のアニメーション
+    const swayDuration = 2000 + Math.random() * 1000;
+    star.classList.add('gentle-drop');
+    star.style.setProperty('--star-speed', `${currentStage.speed}ms`);
+    star.style.setProperty('--sway-duration', `${swayDuration}ms`);
+   } else {
+    // 通常ステージ用のアニメーション
+    const swayAmplitude = 50 + Math.random() * 50;
+    const swayDuration = 2000 + Math.random() * 1000;
+    star.classList.add('normal-drop');
+    star.style.setProperty('--sway-amplitude', `${swayAmplitude}px`);
+   }
    
-   const swayAmplitude = 50 + Math.random() * 50;
-   const swayDuration = 2000 + Math.random() * 1000;
-   
-   star.style.animation = `
-    drop ${currentStage.speed}ms linear,
-    sway ${swayDuration}ms ease-in-out infinite,
-    rotate 4s linear infinite
-   `;
-   star.style.setProperty('--sway-amplitude', `${swayAmplitude}px`);
    star.style.left = Math.random() * (window.innerWidth - 50) + 'px';
-   
+
    area.appendChild(star);
    pop.play();
-   
+
    const collisionCheck = setInterval(() => {
     const starRect = star.getBoundingClientRect();
     const raccoonRect = raccoon.getBoundingClientRect();
-    
-    if (starRect.bottom >= raccoonRect.top && 
-     starRect.left < raccoonRect.right && 
+
+    if (starRect.bottom >= raccoonRect.top &&
+     starRect.left < raccoonRect.right &&
      starRect.right > raccoonRect.left) {
      score += starType.score;
      scoreEl.textContent = score;
@@ -312,11 +340,11 @@
    stageEl.textContent = stage + 1;
    message.style.display = 'none';
    running = true;
-   
+
    // BGM再生
    mainBgm.currentTime = 0;
    mainBgm.play();
-   
+
    interval = setInterval(spawnStar, currentStage.dropInterval);
    timer = setInterval(() => {
     time--;
@@ -329,10 +357,10 @@
    clearInterval(interval);
    clearInterval(timer);
    running = false;
-   
+
    // BGM停止
    mainBgm.pause();
-   
+
    if (score >= currentStage.goal) {
     clearBgm.play();
     messageContent.innerHTML = `<h2>ステージ${stage + 1} クリア！</h2><p>獲得スコア: ${score}</p>`;
@@ -365,7 +393,7 @@
    startStage();
   });
   nextButton.addEventListener('click', () => { stage++; startStage(); });
-  retryButton.addEventListener('click', () => { stage = 0; startStage(); });
+  retryButton.addEventListener('click', () => { showStartScreen(); });
 
   // タッチ操作
   let touchStartX = 0;
@@ -382,7 +410,7 @@
    const touchX = e.touches[0].clientX;
    const deltaX = touchX - touchStartX;
    let newLeft = raccoonStartX + deltaX;
-   
+
    newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
    raccoon.style.left = `${newLeft}px`;
    raccoon.style.transform = 'translateX(0)';
@@ -405,7 +433,7 @@
    if (!isDragging || !running) return;
    const deltaX = e.clientX - mouseStartX;
    let newLeft = mouseRaccoonStartX + deltaX;
-   
+
    newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
    raccoon.style.left = `${newLeft}px`;
   });
