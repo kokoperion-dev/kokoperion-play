@@ -67,11 +67,16 @@
   }
   /* 第3ステージ専用のゆるやかなアニメーション */
   .star.gentle-drop {
-    animation:
-    drop 4000ms linear, /* 落下速度は元のまま */
-    gentleSway 3s ease-in-out infinite alternate, /* ゆるやかな揺れを追加 */
-    rotate 4s linear infinite;
+    animation: drop 4000ms linear, rotate 4s linear infinite;
   }
+  .star.gentle-sway {
+   animation-name: gentleSway;
+   animation-duration: 3s;
+   animation-timing-function: ease-in-out;
+   animation-iteration-count: infinite;
+   animation-direction: alternate;
+  }
+  
   @keyframes drop {
    from { top: 0; }
    to { top: 100%; }
@@ -191,7 +196,7 @@
    },
    {
     dropInterval: 1000,
-    speed: 4000, // 落下速度は元のまま
+    speed: 4000,
     goal: 55,
     starTypes: [
      { type: 'normal', prob: 0.1, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
@@ -290,14 +295,14 @@
    // ステージに応じてアニメーションを切り替え
    if (currentStage.gentle) {
     // 第3ステージ用のアニメーション
-    star.classList.add('gentle-drop');
+    star.classList.add('gentle-drop', 'gentle-sway');
    } else {
     // 通常ステージ用のアニメーション
     const swayAmplitude = 50 + Math.random() * 50;
     star.classList.add('normal-drop');
     star.style.setProperty('--sway-amplitude', `${swayAmplitude}px`);
    }
-   
+
    star.style.left = Math.random() * (window.innerWidth - 50) + 'px';
 
    area.appendChild(star);
