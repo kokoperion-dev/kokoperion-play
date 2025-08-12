@@ -16,7 +16,7 @@
    position: relative;
    width: 100vw;
    height: 100vh;
-   background-image: url('background.PNG');
+   background-image: url('background.PNG'); /* 大文字に修正 */
    background-size: cover;
    background-position: center;
   }
@@ -87,10 +87,27 @@
    0% { transform: rotate(0deg); }
    100% { transform: rotate(360deg); }
   }
-  /* 第3ステージ用の新しい揺れアニメーション */
+  /* 第3ステージ用の揺れアニメーション */
   @keyframes gentleSway {
    0% { transform: translateX(-60px); }
    100% { transform: translateX(60px); }
+  }
+  /* 雲のスタイル */
+  .cloud {
+    position: absolute;
+    width: 250px;
+    opacity: 0.5;
+    z-index: 8;
+  }
+  /* 雲の移動アニメーション */
+  @keyframes cloud-move {
+    from { right: -250px; }
+    to { right: 5%; }
+  }
+  /* 雲のフェードアウトアニメーション */
+  @keyframes cloud-fade-out {
+    from { right: 5%; opacity: 0.5; }
+    to { right: 105%; opacity: 0; }
   }
 
   #score-display, #timer-display, #stage-display {
@@ -198,7 +215,19 @@
      { type: 'rainbow', prob: 0.5, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
      { type: 'diamond', prob: 0.4, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' }
     ],
-    gentle: true // 第3ステージ専用のフラグ
+    gentle: true
+   },
+   {
+    dropInterval: 1000,
+    speed: 4000,
+    goal: 60,
+    starTypes: [
+     { type: 'normal', prob: 0.1, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
+     { type: 'rainbow', prob: 0.5, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
+     { type: 'diamond', prob: 0.4, score: 3, sound: 'star_catch_diamond', img: 'star_diamond.png' }
+    ],
+    gentle: true,
+    clouds: true
    }
   ];
 
@@ -284,7 +313,6 @@
    const starType = getRandomStarType();
 
    star.src = starType.img;
-   star.onerror = () => star.src = starType.img.replace('.PNG', '.png');
    star.className = `star visible ${starType.type}`;
 
    if (currentStage.gentle) {
@@ -328,6 +356,45 @@
    stageEl.textContent = stage + 1;
    message.style.display = 'none';
    running = true;
+   
+   // 既存の雲をすべて削除
+   document.querySelectorAll('.cloud').forEach(cloud => cloud.remove());
+
+   // 第4ステージの場合に雲を生成
+   if (currentStage.clouds) {
+    setTimeout(() => {
+        const cloud1 = document.createElement('img');
+        cloud1.src = 'cloud.png';
+        cloud1.className = 'cloud';
+        cloud1.style.top = '30%';
+        cloud1.style.right = '-250px';
+        area.appendChild(cloud1);
+
+        cloud1.style.animation = 'cloud-move 2s forwards';
+
+        cloud1.addEventListener('animationend', () => {
+            setTimeout(() => {
+                cloud1.style.animation = 'cloud-fade-out 3s forwards';
+            }, 5000);
+        }, { once: true });
+
+        const cloud2 = document.createElement('img');
+        cloud2.src = 'cloud.png';
+        cloud2.className = 'cloud';
+        cloud2.style.top = '50%';
+        cloud2.style.right = '-250px';
+        area.appendChild(cloud2);
+
+        setTimeout(() => {
+            cloud2.style.animation = 'cloud-move 2s forwards';
+            cloud2.addEventListener('animationend', () => {
+                setTimeout(() => {
+                    cloud2.style.animation = 'cloud-fade-out 3s forwards';
+                }, 5000);
+            }, { once: true });
+        }, 15000);
+    }, 10000);
+   }
 
    mainBgm.currentTime = 0;
    mainBgm.play();
@@ -344,6 +411,8 @@
    clearInterval(interval);
    clearInterval(timer);
    running = false;
+   
+   document.querySelectorAll('.cloud').forEach(cloud => cloud.remove());
 
    mainBgm.pause();
 
@@ -434,4 +503,3 @@
  </script>
 </body>
 </html>
-
