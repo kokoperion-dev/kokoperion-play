@@ -1,176 +1,172 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
- <meta charset="UTF-8" />
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>ココペリオン - ～星と森とココペリと～</title>
- <style>
-  body {
-   margin: 0;
-   padding: 0;
-   background: black;
-   overflow: hidden;
-   font-family: sans-serif;
-  }
-  #game-area {
-   position: relative;
-   width: 100vw;
-   height: 100vh;
-   background-image: url('background.PNG');
-   background-size: cover;
-   background-position: center;
-  }
-  #kokopelli {
-   position: absolute;
-   top: 10%;
-   left: 5%;
-   width: 100px;
-   z-index: 10;
-   animation: float 3s ease-in-out infinite alternate;
-  }
-  @keyframes float {
-   0% { transform: translateX(0); }
-   50% { transform: translateX(20px); }
-   100% { transform: translateX(-20px); }
-  }
-  #raccoon {
-   position: absolute;
-   bottom: 10%;
-   left: 50%;
-   transform: translateX(-50%);
-   width: 120px;
-   z-index: 10;
-  }
-  .star {
-   position: absolute;
-   width: 40px;
-   opacity: 0;
-   transition: opacity 0.5s;
-   z-index: 5;
-   pointer-events: none;
-  }
-  .star.rainbow {
-   width: 45px;
-  }
-  .star.diamond {
-   width: 35px;
-  }
-  .star.visible {
-   opacity: 1;
-  }
-  /* 通常ステージのアニメーション */
-  .star.normal-drop {
-   animation:
-    drop 4000ms linear,
-    sway ease-in-out infinite,
-    rotate 4s linear infinite;
-  }
-  /* 第3ステージ専用のゆるやかなアニメーション */
-  .star.gentle-drop {
-    animation:
-    drop 4000ms linear,
-    gentleSway 3s ease-in-out infinite alternate;
-  }
-  
-  @keyframes drop {
-   from { top: 0; }
-   to { top: 100%; }
-  }
-  @keyframes sway {
-   0% { transform: translateX(0) rotate(0deg); }
-   25% { transform: translateX(var(--sway-amplitude)) rotate(5deg); }
-   50% { transform: translateX(0) rotate(0deg); }
-   75% { transform: translateX(calc(-1 * var(--sway-amplitude))) rotate(-5deg); }
-   100% { transform: translateX(0) rotate(0deg); }
-  }
-  @keyframes rotate {
-   0% { transform: rotate(0deg); }
-   100% { transform: rotate(360deg); }
-  }
-  /* 第3ステージ用の新しい揺れアニメーション */
-  @keyframes gentleSway {
-   0% { transform: translateX(-60px); }
-   100% { transform: translateX(60px); }
-  }
-  /* 雲のスタイル */
-  .cloud {
-   position: absolute;
-   width: 250px;
-   top: 30%;
-   opacity: 0;
-   pointer-events: none;
-   z-index: 8;
-  }
-  /* 雲のアニメーション */
-  @keyframes cloud-animation {
-   0% { right: -250px; opacity: 0; }
-   33.3% { right: -250px; opacity: 0; } /* 10秒待機 (30秒のゲーム時間に対して) */
-   40% { right: 5%; opacity: 0.5; } /* 2秒かけて右から中央へ */
-   56.6% { right: 5%; opacity: 0.5; } /* 5秒間停滞 */
-   66.6% { right: 105%; opacity: 0; } /* 3秒かけて左へフェードアウト */
-   100% { right: 105%; opacity: 0; }
-  }
-  .move-cloud {
-   animation: cloud-animation 30s forwards;
-  }
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>ココペリオン - ～星と森とココペリと～</title>
+ <style>
+  body {
+   margin: 0;
+   padding: 0;
+   background: black;
+   overflow: hidden;
+   font-family: sans-serif;
+  }
+  #game-area {
+   position: relative;
+   width: 100vw;
+   height: 100vh;
+   background-image: url('background.PNG');
+   background-size: cover;
+   background-position: center;
+  }
+  #kokopelli {
+   position: absolute;
+   top: 10%;
+   left: 5%;
+   width: 100px;
+   z-index: 10;
+   animation: float 3s ease-in-out infinite alternate;
+  }
+  @keyframes float {
+   0% { transform: translateX(0); }
+   50% { transform: translateX(20px); }
+   100% { transform: translateX(-20px); }
+  }
+  #raccoon {
+   position: absolute;
+   bottom: 10%;
+   left: 50%;
+   transform: translateX(-50%);
+   width: 120px;
+   z-index: 10;
+  }
+  .star {
+   position: absolute;
+   width: 40px;
+   opacity: 0;
+   transition: opacity 0.5s;
+   z-index: 5;
+   pointer-events: none;
+  }
+  .star.rainbow {
+   width: 45px;
+  }
+  .star.diamond {
+   width: 35px;
+  }
+  .star.visible {
+   opacity: 1;
+  }
+  /* 通常ステージのアニメーション */
+  .star.normal-drop {
+   animation:
+    drop 4000ms linear,
+    sway ease-in-out infinite,
+    rotate 4s linear infinite;
+  }
+  /* 第3ステージ専用のゆるやかなアニメーション */
+  .star.gentle-drop {
+    animation:
+    drop 4000ms linear,
+    gentleSway 3s ease-in-out infinite alternate;
+  }
+  
+  @keyframes drop {
+   from { top: 0; }
+   to { top: 100%; }
+  }
+  @keyframes sway {
+   0% { transform: translateX(0) rotate(0deg); }
+   25% { transform: translateX(var(--sway-amplitude)) rotate(5deg); }
+   50% { transform: translateX(0) rotate(0deg); }
+   75% { transform: translateX(calc(-1 * var(--sway-amplitude))) rotate(-5deg); }
+   100% { transform: translateX(0) rotate(0deg); }
+  }
+  @keyframes rotate {
+   0% { transform: rotate(0deg); }
+   100% { transform: rotate(360deg); }
+  }
+  /* 第3ステージ用の揺れアニメーション */
+  @keyframes gentleSway {
+   0% { transform: translateX(-60px); }
+   100% { transform: translateX(60px); }
+  }
+  /* 雲のスタイル */
+  .cloud {
+    position: absolute;
+    width: 250px;
+    opacity: 0.5;
+    z-index: 8;
+  }
+  /* 雲の移動アニメーション */
+  @keyframes cloud-move {
+    from { right: -250px; }
+    to { right: 5%; }
+  }
+  /* 雲のフェードアウトアニメーション */
+  @keyframes cloud-fade-out {
+    from { right: 5%; opacity: 0.5; }
+    to { right: 105%; opacity: 0; }
+  }
 
-  #score-display, #timer-display, #stage-display {
-   position: absolute;
-   color: white;
-   font-size: 20px;
-   z-index: 20;
-   background: rgba(0,0,0,0.5);
-   padding: 5px 10px;
-   border-radius: 10px;
-  }
-  #score-display { top: 10px; right: 10px; }
-  #timer-display { top: 10px; right: 150px; }
-  #stage-display { top: 10px; left: 10px; }
+  #score-display, #timer-display, #stage-display {
+   position: absolute;
+   color: white;
+   font-size: 20px;
+   z-index: 20;
+   background: rgba(0,0,0,0.5);
+   padding: 5px 10px;
+   border-radius: 10px;
+  }
+  #score-display { top: 10px; right: 10px; }
+  #timer-display { top: 10px; right: 150px; }
+  #stage-display { top: 10px; left: 10px; }
 
-  #message-overlay {
-   position: absolute;
-   top: 0; left: 0;
-   width: 100%; height: 100%;
-   background: rgba(0,0,0,0.8);
-   color: white;
-   z-index: 100;
-   display: none;
-   justify-content: center;
-   align-items: center;
-   flex-direction: column;
-   text-align: center;
-   padding: 20px;
-  }
-  #message-overlay h2 {
-   color: #ffcc00;
-   margin-bottom: 10px;
-  }
-  #message-overlay button {
-   font-size: 18px;
-   padding: 10px 20px;
-   margin: 10px;
-   background: #4CAF50;
-   color: white;
-   border: none;
-   border-radius: 5px;
-   cursor: pointer;
-  }
-  #wisdom {
-   font-style: italic;
-   margin: 20px 0;
-   color: #ffcc00;
-   max-width: 80%;
-   line-height: 1.6;
-  }
- </style>
+  #message-overlay {
+   position: absolute;
+   top: 0; left: 0;
+   width: 100%; height: 100%;
+   background: rgba(0,0,0,0.8);
+   color: white;
+   z-index: 100;
+   display: none;
+   justify-content: center;
+   align-items: center;
+   flex-direction: column;
+   text-align: center;
+   padding: 20px;
+  }
+  #message-overlay h2 {
+   color: #ffcc00;
+   margin-bottom: 10px;
+  }
+  #message-overlay button {
+   font-size: 18px;
+   padding: 10px 20px;
+   margin: 10px;
+   background: #4CAF50;
+   color: white;
+   border: none;
+   border-radius: 5px;
+   cursor: pointer;
+  }
+  #wisdom {
+   font-style: italic;
+   margin: 20px 0;
+   color: #ffcc00;
+   max-width: 80%;
+   line-height: 1.6;
+  }
+ </style>
 </head>
 <body>
- <div id="game-area">
-  <img id="kokopelli" src="kokopelli.PNG" alt="ココペリ">
-  <img id="raccoon" src="raccoon.PNG" alt="アライグマ">
-  <div id="score-display">スコア: <span id="score">0</span></div>
-  <div id="timer-display">残り: <span id="timer">30</span>秒</div>
-  <div id="stage-display">ステージ: <span id="stage">1</span></div>
+ <div id="game-area">
+  <img id="kokopelli" src="kokopelli.PNG" alt="ココペリ">
+  <img id="raccoon" src="raccoon.PNG" alt="アライグマ">
+  <div id="score-display">スコア: <span id="score">0</span></div>
+  <div id="timer-display">残り: <span id="timer">30</span>秒</div>
+  <div id="stage-display">ステージ: <span id="stage">1</span></div>
  </div>
 
  <div id="message-overlay">
@@ -366,126 +362,4 @@
    document.querySelectorAll('.cloud').forEach(cloud => cloud.remove());
 
    // 第4ステージの場合に雲を生成
-   if (currentStage.clouds) {
-     const cloud1 = document.createElement('img');
-     cloud1.src = 'cloud.PNG';
-     cloud1.className = 'cloud move-cloud';
-     cloud1.style.top = '30%';
-     area.appendChild(cloud1);
-
-     const cloud2 = document.createElement('img');
-     cloud2.src = 'cloud.PNG';
-     cloud2.className = 'cloud move-cloud';
-     cloud2.style.top = '50%';
-     cloud2.style.animationDelay = '5s';
-     area.appendChild(cloud2);
-   }
-
-   mainBgm.currentTime = 0;
-   mainBgm.play();
-
-   interval = setInterval(spawnStar, currentStage.dropInterval);
-   timer = setInterval(() => {
-    time--;
-    timerEl.textContent = time;
-    if (time <= 0) endStage();
-   }, 1000);
-  }
-
-  function endStage() {
-   clearInterval(interval);
-   clearInterval(timer);
-   running = false;
-   
-   // 既存の雲をすべて削除
-   document.querySelectorAll('.cloud').forEach(cloud => cloud.remove());
-
-   mainBgm.pause();
-
-   if (score >= currentStage.goal) {
-    clearBgm.play();
-    messageContent.innerHTML = `<h2>ステージ${stage + 1} クリア！</h2><p>獲得スコア: ${score}</p>`;
-    nextButton.style.display = stage < stages.length - 1 ? 'block' : 'none';
-    wisdomEl.textContent = getRandomWisdom();
-    startButton.style.display = 'none';
-   } else {
-    failBgm.play();
-    messageContent.innerHTML = `<h2>ステージ${stage + 1} 失敗</h2><p>目標スコア: ${currentStage.goal}</p>`;
-    wisdomEl.textContent = getRandomWisdom();
-    nextButton.style.display = 'none';
-    startButton.style.display = 'none';
-   }
-   retryButton.style.display = 'block';
-   message.style.display = 'flex';
-  }
-
-  function showStartScreen() {
-   messageContent.innerHTML = '<h2>ココペリオン<br>〜知恵の星を集めよう〜</h2><p>アライグマを操作して、空から降ってくる「知恵の星」を集めよう！</p>';
-   wisdomEl.textContent = getRandomWisdom();
-   startButton.style.display = 'block';
-   nextButton.style.display = 'none';
-   retryButton.style.display = 'none';
-   message.style.display = 'flex';
-   stage = 0;
-  }
-
-  startButton.addEventListener('click', () => {
-   startStage();
-  });
-  nextButton.addEventListener('click', () => {
-   stage++;
-   startStage();
-  });
-  retryButton.addEventListener('click', () => {
-   startStage();
-  });
-
-  let touchStartX = 0;
-  let raccoonStartX = 0;
-
-  window.addEventListener('touchstart', (e) => {
-   if (!running) return;
-   touchStartX = e.touches[0].clientX;
-   raccoonStartX = raccoon.offsetLeft;
-  });
-
-  window.addEventListener('touchmove', (e) => {
-   if (!running) return;
-   const touchX = e.touches[0].clientX;
-   const deltaX = touchX - touchStartX;
-   let newLeft = raccoonStartX + deltaX;
-
-   newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
-   raccoon.style.left = `${newLeft}px`;
-   raccoon.style.transform = 'translateX(0)';
-  });
-
-  let isDragging = false;
-  let mouseStartX = 0;
-  let mouseRaccoonStartX = 0;
-
-  raccoon.addEventListener('mousedown', (e) => {
-   if (!running) return;
-   isDragging = true;
-   mouseStartX = e.clientX;
-   mouseRaccoonStartX = raccoon.offsetLeft;
-   e.preventDefault();
-  });
-
-  window.addEventListener('mousemove', (e) => {
-   if (!isDragging || !running) return;
-   const deltaX = e.clientX - mouseStartX;
-   let newLeft = mouseRaccoonStartX + deltaX;
-
-   newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
-   raccoon.style.left = `${newLeft}px`;
-  });
-
-  window.addEventListener('mouseup', () => {
-   isDragging = false;
-  });
-
-  window.addEventListener('load', showStartScreen);
- </script>
-</body>
-</html>
+   if (currentStage.clouds
