@@ -5,142 +5,160 @@
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  <title>ココペリオン - ～星と森とココペリと～</title>
  <style>
-  body {
-   margin: 0;
-   padding: 0;
-   background: black;
-   overflow: hidden;
-   font-family: sans-serif;
-  }
-  #game-area {
-   position: relative;
-   width: 100vw;
-   height: 100vh;
-   background-image: url('background.PNG');
-   background-size: cover;
-   background-position: center;
-  }
-  #kokopelli {
-   position: absolute;
-   top: 10%;
-   left: 5%;
-   width: 100px;
-   z-index: 10;
-   animation: float 3s ease-in-out infinite alternate;
-  }
-  @keyframes float {
-   0% { transform: translateX(0); }
-   50% { transform: translateX(20px); }
-   100% { transform: translateX(-20px); }
-  }
-  #raccoon {
-   position: absolute;
-   bottom: 10%;
-   left: 50%;
-   transform: translateX(-50%);
-   width: 120px;
-   z-index: 10;
-  }
-  .star {
-   position: absolute;
-   width: 40px;
-   opacity: 0;
-   transition: opacity 0.5s;
-   z-index: 5;
-   pointer-events: none;
-  }
-  .star.rainbow {
-   width: 45px;
-  }
-  .star.diamond {
-   width: 35px;
-  }
-  .star.visible {
-   opacity: 1;
-  }
-  /* 通常ステージのアニメーション */
-  .star.normal-drop {
-   animation:
-    drop 4000ms linear,
-    sway ease-in-out infinite,
-    rotate 4s linear infinite;
-  }
-  /* 第3ステージ専用のゆるやかなアニメーション */
-  .star.gentle-drop {
-    animation:
-    drop 4000ms linear,
-    gentleSway 3s ease-in-out infinite alternate;
-  }
-  
-  @keyframes drop {
-   from { top: 0; }
-   to { top: 100%; }
-  }
-  @keyframes sway {
-   0% { transform: translateX(0) rotate(0deg); }
-   25% { transform: translateX(var(--sway-amplitude)) rotate(5deg); }
-   50% { transform: translateX(0) rotate(0deg); }
-   75% { transform: translateX(calc(-1 * var(--sway-amplitude))) rotate(-5deg); }
-   100% { transform: translateX(0) rotate(0deg); }
-  }
-  @keyframes rotate {
-   0% { transform: rotate(0deg); }
-   100% { transform: rotate(360deg); }
-  }
-  /* 第3ステージ用の新しい揺れアニメーション */
-  @keyframes gentleSway {
-   0% { transform: translateX(-60px); }
-   100% { transform: translateX(60px); }
-  }
+ body {
+  margin: 0;
+  padding: 0;
+  background: black;
+  overflow: hidden;
+  font-family: sans-serif;
+ }
+ #game-area {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('background.PNG');
+  background-size: cover;
+  background-position: center;
+ }
+ #kokopelli {
+  position: absolute;
+  top: 10%;
+  left: 5%;
+  width: 100px;
+  z-index: 10;
+  animation: float 3s ease-in-out infinite alternate;
+ }
+ @keyframes float {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(20px); }
+  100% { transform: translateX(-20px); }
+ }
+ #raccoon {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  z-index: 10;
+ }
+ .star {
+  position: absolute;
+  width: 40px;
+  opacity: 0;
+  transition: opacity 0.5s;
+  z-index: 5;
+  pointer-events: none;
+ }
+ .star.rainbow {
+  width: 45px;
+ }
+ .star.diamond {
+  width: 35px;
+ }
+ .star.visible {
+  opacity: 1;
+ }
+ /* 通常ステージのアニメーション */
+ .star.normal-drop {
+  animation:
+  drop 4000ms linear,
+  sway ease-in-out infinite,
+  rotate 4s linear infinite;
+ }
+ /* 第3ステージ専用のゆるやかなアニメーション */
+ .star.gentle-drop {
+  animation:
+  drop 4000ms linear,
+  gentleSway 3s ease-in-out infinite alternate;
+ }
+ 
+ @keyframes drop {
+  from { top: 0; }
+  to { top: 100%; }
+ }
+ @keyframes sway {
+  0% { transform: translateX(0) rotate(0deg); }
+  25% { transform: translateX(var(--sway-amplitude)) rotate(5deg); }
+  50% { transform: translateX(0) rotate(0deg); }
+  75% { transform: translateX(calc(-1 * var(--sway-amplitude))) rotate(-5deg); }
+  100% { transform: translateX(0) rotate(0deg); }
+ }
+ @keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+ }
+ /* 第3ステージ用の新しい揺れアニメーション */
+ @keyframes gentleSway {
+  0% { transform: translateX(var(--gentle-sway-amplitude)); }
+  100% { transform: translateX(calc(-1 * var(--gentle-sway-amplitude))); }
+ }
 
-  #score-display, #timer-display, #stage-display {
-   position: absolute;
-   color: white;
-   font-size: 20px;
-   z-index: 20;
-   background: rgba(0,0,0,0.5);
-   padding: 5px 10px;
-   border-radius: 10px;
-  }
-  #score-display { top: 10px; right: 10px; }
-  #timer-display { top: 10px; right: 150px; }
-  #stage-display { top: 10px; left: 10px; }
+ /* 雲のスタイルとアニメーション */
+ .cloud {
+  position: absolute;
+  width: 250px;
+  z-index: 8;
+  opacity: 0;
+  right: -250px; /* 右端から開始 */
+ }
+ .cloud.move {
+  animation: cloud-flow-left 12s linear forwards;
+ }
+ @keyframes cloud-flow-left {
+  0% { opacity: 0; transform: translateX(0); }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-105vw); }
+ }
 
-  #message-overlay {
-   position: absolute;
-   top: 0; left: 0;
-   width: 100%; height: 100%;
-   background: rgba(0,0,0,0.8);
-   color: white;
-   z-index: 100;
-   display: none;
-   justify-content: center;
-   align-items: center;
-   flex-direction: column;
-   text-align: center;
-   padding: 20px;
-  }
-  #message-overlay h2 {
-   color: #ffcc00;
-   margin-bottom: 10px;
-  }
-  #message-overlay button {
-   font-size: 18px;
-   padding: 10px 20px;
-   margin: 10px;
-   background: #4CAF50;
-   color: white;
-   border: none;
-   border-radius: 5px;
-   cursor: pointer;
-  }
-  #wisdom {
-   font-style: italic;
-   margin: 20px 0;
-   color: #ffcc00;
-   max-width: 80%;
-   line-height: 1.6;
-  }
+ #score-display, #timer-display, #stage-display {
+  position: absolute;
+  color: white;
+  font-size: 20px;
+  z-index: 20;
+  background: rgba(0,0,0,0.5);
+  padding: 5px 10px;
+  border-radius: 10px;
+ }
+ #score-display { top: 10px; right: 10px; }
+ #timer-display { top: 10px; right: 150px; }
+ #stage-display { top: 10px; left: 10px; }
+
+ #message-overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  z-index: 100;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  padding: 20px;
+ }
+ #message-overlay h2 {
+  color: #ffcc00;
+  margin-bottom: 10px;
+ }
+ #message-overlay button {
+  font-size: 18px;
+  padding: 10px 20px;
+  margin: 10px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+ }
+ #wisdom {
+  font-style: italic;
+  margin: 20px 0;
+  color: #ffcc00;
+  max-width: 80%;
+  line-height: 1.6;
+ }
  </style>
 </head>
 <body>
@@ -198,7 +216,21 @@
      { type: 'rainbow', prob: 0.5, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
      { type: 'diamond', prob: 0.4, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' }
     ],
-    gentle: true // 第3ステージ専用のフラグ
+    gentle: true,
+    swayAmplitude: 40 // 揺れ幅を40pxに修正
+   },
+   {
+    dropInterval: 1000,
+    speed: 4000,
+    goal: 55,
+    starTypes: [
+     { type: 'normal', prob: 0.1, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
+     { type: 'rainbow', prob: 0.5, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
+     { type: 'diamond', prob: 0.4, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' }
+    ],
+    gentle: true,
+    clouds: true,
+    swayAmplitude: 30 // 揺れ幅を30pxに修正
    }
   ];
 
@@ -244,7 +276,7 @@
   ];
 
   let stage = 0, score = 0, time = 30, interval, timer, running = false;
-  let currentStage = stages[stage];
+  let currentStage;
 
   const raccoon = document.getElementById('raccoon');
   const area = document.getElementById('game-area');
@@ -261,6 +293,13 @@
   const clearBgm = document.getElementById('bgm-clear');
   const failBgm = document.getElementById('bgm-fail');
   const mainBgm = document.getElementById('bgm-main');
+
+  // ゲーム開始前に画像をプリロード
+  const imageFiles = ['background.PNG', 'kokopelli.PNG', 'raccoon.PNG', 'star_normal.png', 'star_rainbow.png', 'star_diamond.png', 'cloud.PNG'];
+  imageFiles.forEach(file => {
+   const img = new Image();
+   img.src = file;
+  });
 
   function getRandomStarType() {
    const rand = Math.random();
@@ -288,13 +327,14 @@
    star.className = `star visible ${starType.type}`;
 
    if (currentStage.gentle) {
+    star.style.setProperty('--gentle-sway-amplitude', `${currentStage.swayAmplitude || 60}px`);
     star.classList.add('gentle-drop');
    } else {
     const swayAmplitude = 50 + Math.random() * 50;
     star.classList.add('normal-drop');
     star.style.setProperty('--sway-amplitude', `${swayAmplitude}px`);
    }
-
+   
    star.style.left = Math.random() * (window.innerWidth - 50) + 'px';
 
    area.appendChild(star);
@@ -319,6 +359,27 @@
    }, 50);
   }
 
+  function createCloud(id, top, delay) {
+    if (!running) return;
+    const cloud = document.createElement('img');
+    cloud.src = 'cloud.PNG';
+    cloud.classList.add('cloud', 'move');
+    cloud.style.top = top;
+    cloud.style.animationDelay = `${delay}s`;
+    area.appendChild(cloud);
+    cloud.addEventListener('animationend', () => {
+        cloud.remove();
+        createCloud(id, top, delay);
+    });
+  }
+
+  function startCloudAnimation() {
+    document.querySelectorAll('.cloud').forEach(el => el.remove());
+    createCloud('cloud-top', '15%', 0);
+    createCloud('cloud-middle', '45%', 3);
+    createCloud('cloud-bottom', '75%', 6);
+  }
+
   function startStage() {
    currentStage = stages[stage];
    score = 0;
@@ -328,6 +389,14 @@
    stageEl.textContent = stage + 1;
    message.style.display = 'none';
    running = true;
+
+   document.querySelectorAll('.star').forEach(el => el.remove());
+
+   if (currentStage.clouds) {
+    startCloudAnimation();
+   } else {
+    document.querySelectorAll('.cloud').forEach(el => el.remove());
+   }
 
    mainBgm.currentTime = 0;
    mainBgm.play();
@@ -346,6 +415,8 @@
    running = false;
 
    mainBgm.pause();
+
+   document.querySelectorAll('.cloud').forEach(el => el.remove());
 
    if (score >= currentStage.goal) {
     clearBgm.play();
@@ -372,6 +443,7 @@
    retryButton.style.display = 'none';
    message.style.display = 'flex';
    stage = 0;
+   currentStage = stages[stage];
   }
 
   startButton.addEventListener('click', () => {
@@ -434,4 +506,3 @@
  </script>
 </body>
 </html>
-
