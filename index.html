@@ -1,679 +1,930 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ココペリオン - ～星と森とココペリと～</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: black;
-            overflow: hidden;
-            font-family: sans-serif;
-        }
-        #game-area {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            background-image: url('background.PNG');
-            background-size: cover;
-            background-position: center;
-        }
-        #kokopelli {
-            position: absolute;
-            top: 10%;
-            left: 5%;
-            width: 100px;
-            z-index: 10;
-            animation: float 3s ease-in-out infinite alternate;
-        }
-        @keyframes float {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(20px); }
-            100% { transform: translateY(-20px); }
-        }
-        #raccoon {
-            position: absolute;
-            bottom: 10%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 120px;
-            z-index: 10;
-        }
-        .star {
-            position: absolute;
-            width: 40px;
-            opacity: 0;
-            transition: opacity 0.5s;
-            z-index: 5;
-            pointer-events: none;
-        }
-        .star.rainbow {
-            width: 45px;
-        }
-        .star.diamond {
-            width: 35px;
-        }
-        .star.visible {
-            opacity: 1;
-        }
-        /* 通常ステージのアニメーション */
-        .star.normal-drop {
-            animation:
-                drop 4000ms linear,
-                sway ease-in-out infinite,
-                rotate 4s linear infinite;
-        }
-        /* 第3ステージ専用のゆるやかなアニメーション */
-        .star.gentle-drop {
-            animation:
-                drop 4000ms linear,
-                gentleSway 3s ease-in-out infinite alternate;
-        }
-        .star.is-grabbed {
-            animation: none !important;
-            transform: none !important;
-            transition: none !important;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ココペリオン - ～星と森とココペリと～</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+    #game-area {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background-image: url('background.PNG');
+      background-size: cover;
+      background-position: center;
+    }
+    #kokopelli {
+      position: absolute;
+      top: 10%;
+      left: 5%;
+      width: 100px;
+      z-index: 10;
+      animation: float 3s ease-in-out infinite alternate;
+    }
+    @keyframes float {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(20px); }
+      100% { transform: translateY(-20px); }
+    }
+    #raccoon {
+      position: absolute;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      z-index: 10;
+      transition: filter 0.2s, opacity 0.5s;
+    }
+    #fox {
+      position: absolute;
+      top: auto;
+      left: auto;
+      right: 5%;
+      bottom: 15%;
+      width: 100px;
+      z-index: 9;
+      opacity: 0;
+      transition: opacity 1s;
+      display: none;
+    }
+    .star {
+      position: absolute;
+      width: 40px;
+      opacity: 0;
+      transition: opacity 0.5s;
+      z-index: 5;
+      pointer-events: none;
+    }
+    .star.rainbow {
+      width: 45px;
+    }
+    .star.diamond {
+      width: 35px;
+    }
+    .star.leaf {
+      width: 40px;
+    }
+    .star.visible {
+      opacity: 1;
+    }
+    /* 通常ステージのアニメーション */
+    .star.normal-drop {
+      animation:
+        drop 4000ms linear,
+        sway ease-in-out infinite,
+        rotate 4s linear infinite;
+    }
+    /* 第3ステージ専用のゆるやかなアニメーション */
+    .star.gentle-drop {
+      animation:
+        drop 4000ms linear,
+        gentleSway 3s ease-in-out infinite alternate;
+    }
+    .star.is-grabbed {
+      animation: none !important;
+      transform: none !important;
+      transition: none !important;
+    }
 
-        @keyframes drop {
-            from { top: 0; }
-            to { top: 100%; }
-        }
-        @keyframes sway {
-            0% { transform: translateX(0) rotate(0deg); }
-            25% { transform: translateX(var(--sway-amplitude)) rotate(5deg); }
-            50% { transform: translateX(0) rotate(0deg); }
-            75% { transform: translateX(calc(-1 * var(--sway-amplitude))) rotate(-5deg); }
-            100% { transform: translateX(0) rotate(0deg); }
-        }
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        /* 第3ステージ用の新しい揺れアニメーション */
-        @keyframes gentleSway {
-            0% { transform: translateX(var(--gentle-sway-amplitude)); }
-            100% { transform: translateX(calc(-1 * var(--gentle-sway-amplitude))); }
-        }
+    @keyframes drop {
+      from { top: 0; }
+      to { top: 100%; }
+    }
+    @keyframes sway {
+      0% { transform: translateX(0) rotate(0deg); }
+      25% { transform: translateX(var(--sway-amplitude)) rotate(5deg); }
+      50% { transform: translateX(0) rotate(0deg); }
+      75% { transform: translateX(calc(-1 * var(--sway-amplitude))) rotate(-5deg); }
+      100% { transform: translateX(0) rotate(0deg); }
+    }
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    /* 第3ステージ用の新しい揺れアニメーション */
+    @keyframes gentleSway {
+      0% { transform: translateX(var(--gentle-sway-amplitude)); }
+      100% { transform: translateX(calc(-1 * var(--gentle-sway-amplitude))); }
+    }
 
-        /* 雲のスタイルとアニメーション */
-        .cloud {
-            position: absolute;
-            width: 250px;
-            z-index: 8;
-            opacity: 0;
-            right: -250px; /* 右端から開始 */
-        }
-        .cloud.move {
-            animation: cloud-flow-left 12s linear forwards;
-        }
-        @keyframes cloud-flow-left {
-            0% { opacity: 0; transform: translateX(0); }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { opacity: 0; transform: translateX(-105vw); }
-        }
+    /* 雲のスタイルとアニメーション */
+    .cloud {
+      position: absolute;
+      width: 250px;
+      z-index: 8;
+      opacity: 0;
+      right: -250px; /* 右端から開始 */
+    }
+    .cloud.move {
+      animation: cloud-flow-left 12s linear forwards;
+    }
+    @keyframes cloud-flow-left {
+      0% { opacity: 0; transform: translateX(0); }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { opacity: 0; transform: translateX(-105vw); }
+    }
+     
+    /* 新しい雨雲のスタイルとアニメーション */
+    #rain-cloud {
+      position: absolute;
+      top: 50px;
+      width: 300px;
+      opacity: 0;
+      transition: left 1s, opacity 1s, transform 1s;
+      z-index: 12;
+    }
+    .lightning {
+      position: absolute;
+      width: 50px;
+      opacity: 0;
+      animation: lightning-strike 3500ms linear forwards;
+    }
+    @keyframes lightning-strike {
+      from { top: 0; opacity: 1; }
+      to { top: 100vh; opacity: 0.5; }
+    }
+    /* 雷が当たった時のアライグマのエフェクト */
+    #raccoon.hit {
+      filter: brightness(200%) hue-rotate(90deg);
+    }
 
-        /* コンドルのスタイルとアニメーション */
-        #condor {
-            position: absolute;
-            top: 40%;
-            width: 150px;
-            z-index: 15;
-            display: none;
-        }
-        .condor-flight-right {
-            animation: fly-right 5s linear forwards;
-        }
-        .condor-flight-left {
-            animation: fly-left 5s linear forwards;
-        }
-        @keyframes fly-left {
-            0% { left: 100%; transform: translateY(0); }
-            25% { transform: translateY(20px); }
-            50% { transform: translateY(0); }
-            75% { transform: translateY(20px); }
-            100% { left: -150px; transform: translateY(0); }
-        }
-        @keyframes fly-right {
-            0% { left: -150px; transform: translateY(0); }
-            25% { transform: translateY(20px); }
-            50% { transform: translateY(0); }
-            75% { transform: translateY(20px); }
-            100% { left: 100%; transform: translateY(0); }
-        }
+    /* コンドルのスタイルとアニメーション */
+    #condor {
+      position: absolute;
+      top: 40%;
+      width: 150px;
+      z-index: 15;
+      display: none;
+    }
+    .condor-flight-right {
+      animation: fly-right 5s linear forwards;
+    }
+    .condor-flight-left {
+      animation: fly-left 5s linear forwards;
+    }
+    @keyframes fly-left {
+      0% { left: 100%; transform: translateY(0); }
+      25% { transform: translateY(20px); }
+      50% { transform: translateY(0); }
+      75% { transform: translateY(20px); }
+      100% { left: -150px; transform: translateY(0); }
+    }
+    @keyframes fly-right {
+      0% { left: -150px; transform: translateY(0); }
+      25% { transform: translateY(20px); }
+      50% { transform: translateY(0); }
+      75% { transform: translateY(20px); }
+      100% { left: 100%; transform: translateY(0); }
+    }
 
-        #score-display, #timer-display, #stage-display {
-            position: absolute;
-            color: white;
-            font-size: 20px;
-            z-index: 20;
-            background: rgba(0,0,0,0.5);
-            padding: 5px 10px;
-            border-radius: 10px;
-        }
-        #score-display { top: 10px; right: 10px; }
-        #timer-display { top: 10px; right: 150px; }
-        #stage-display { top: 10px; left: 10px; }
+    #score-display, #timer-display, #stage-display {
+      position: absolute;
+      color: white;
+      font-size: 20px;
+      z-index: 20;
+      background: rgba(0,0,0,0.5);
+      padding: 5px 10px;
+      border-radius: 10px;
+    }
+    #score-display { top: 10px; right: 10px; }
+    #timer-display { top: 10px; right: 150px; }
+    #stage-display { top: 10px; left: 10px; }
 
-        #message-overlay {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            z-index: 100;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            text-align: center;
-            padding: 20px;
-        }
-        #message-overlay h2 {
-            color: #ffcc00;
-            margin-bottom: 10px;
-        }
-        #message-overlay button {
-            font-size: 18px;
-            padding: 10px 20px;
-            margin: 10px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #wisdom {
-            font-style: italic;
-            margin: 20px 0;
-            color: #ffcc00;
-            max-width: 80%;
-            line-height: 1.6;
-        }
-    </style>
+    #message-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 20px;
+    }
+    #message-overlay h2 {
+      color: #ffcc00;
+      margin-bottom: 10px;
+    }
+    #message-overlay button {
+      font-size: 18px;
+      padding: 10px 20px;
+      margin: 10px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #wisdom {
+      font-style: italic;
+      margin: 20px 0;
+      color: #ffcc00;
+      max-width: 80%;
+      line-height: 1.6;
+    }
+  </style>
 </head>
 <body>
-    <div id="game-area">
-        <img id="kokopelli" src="kokopelli.PNG" alt="ココペリ">
-        <img id="raccoon" src="raccoon.PNG" alt="アライグマ">
-        <img id="condor" src="condor.PNG" alt="コンドル">
-        <div id="score-display">スコア: <span id="score">0</span></div>
-        <div id="timer-display">残り: <span id="timer">30</span>秒</div>
-        <div id="stage-display">ステージ: <span id="stage">1</span></div>
-    </div>
+  <div id="game-area">
+    <img id="kokopelli" src="kokopelli.PNG" alt="ココペリ">
+    <img id="raccoon" src="raccoon.PNG" alt="アライグマ">
+    <img id="fox" src="fox.PNG" alt="キツネ">
+    <img id="condor" src="condor.PNG" alt="コンドル">
+    <img id="rain-cloud" src="rain-cloud.PNG" alt="雨雲">
+    <div id="score-display">スコア: <span id="score">0</span></div>
+    <div id="timer-display">残り: <span id="timer">30</span>秒</div>
+    <div id="stage-display">ステージ: <span id="stage">1</span></div>
+  </div>
 
-    <div id="message-overlay">
-        <div id="message-content"></div>
-        <div id="wisdom"></div>
-        <button id="start-button" style="display:none;">スタート</button>
-        <button id="next-button" style="display:none;">次へ</button>
-        <button id="retry-button" style="display:none;">もう一度</button>
-    </div>
+  <div id="message-overlay">
+    <div id="message-content"></div>
+    <div id="wisdom"></div>
+    <button id="start-button" style="display:none;">スタート</button>
+    <button id="next-button" style="display:none;">次へ</button>
+    <button id="retry-button" style="display:none;">もう一度</button>
+  </div>
 
-    <audio id="sound-pop" src="star_pop.mp3"></audio>
-    <audio id="sound-catch" src="star_catch.mp3"></audio>
-    <audio id="sound-catch-rainbow" src="star_catch_rainbow.mp3"></audio>
-    <audio id="sound-catch-diamond" src="star_catch_diamond.mp3"></audio>
-    <audio id="bgm-clear" src="clear_bgm.mp3"></audio>
-    <audio id="bgm-fail" src="fail_bgm.mp3"></audio>
-    <audio id="bgm-main" src="main_bgm.mp3" loop></audio>
+  <audio id="sound-pop" src="star_pop.mp3"></audio>
+  <audio id="sound-catch" src="star_catch.mp3"></audio>
+  <audio id="sound-catch-rainbow" src="star_catch_rainbow.mp3"></audio>
+  <audio id="sound-catch-diamond" src="star_catch_diamond.mp3"></audio>
+  <audio id="bgm-clear" src="clear_bgm.mp3"></audio>
+  <audio id="bgm-fail" src="fail_bgm.mp3"></audio>
+  <audio id="bgm-main" src="main_bgm.mp3" loop></audio>
 
-    <script>
-        const stages = [
-            {
-                dropInterval: 2000,
-                speed: 4000,
-                goal: 12,
-                starTypes: [
-                    { type: 'normal', prob: 0.9, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
-                    { type: 'rainbow', prob: 0.1, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' }
-                ],
-                clouds: false
-            },
-            {
-                dropInterval: 1500,
-                speed: 4000,
-                goal: 25,
-                starTypes: [
-                    { type: 'normal', prob: 0.5, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
-                    { type: 'rainbow', prob: 0.4, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
-                    { type: 'diamond', prob: 0.1, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' }
-                ],
-                clouds: false
-            },
-            {
-                dropInterval: 1000,
-                speed: 4000,
-                goal: 55,
-                starTypes: [
-                    { type: 'normal', prob: 0.1, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
-                    { type: 'rainbow', prob: 0.5, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
-                    { type: 'diamond', prob: 0.4, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' }
-                ],
-                gentle: true,
-                swayAmplitude: 60,
-                clouds: false
-            },
-            {
-                dropInterval: 1000,
-                speed: 4000,
-                goal: 55,
-                starTypes: [
-                    { type: 'normal', prob: 0.1, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
-                    { type: 'rainbow', prob: 0.5, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
-                    { type: 'diamond', prob: 0.4, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' }
-                ],
-                gentle: true,
-                clouds: true,
-                swayAmplitude: 40
-            },
-            {
-                dropInterval: 800,
-                speed: 4000,
-                goal: 65,
-                starTypes: [
-                    { type: 'normal', prob: 0.1, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
-                    { type: 'rainbow', prob: 0.4, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
-                    { type: 'diamond', prob: 0.5, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' }
-                ],
-                gentle: true,
-                swayAmplitude: 30,
-                clouds: false,
-                condors: true,
-                condorFlip: true
-            }
-        ];
+  <script>
+    const stages = [
+      {
+        dropInterval: 2000,
+        speed: 4000,
+        goal: 12,
+        starTypes: [
+          { type: 'normal', prob: 0.9, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
+          { type: 'rainbow', prob: 0.1, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' }
+        ],
+        clouds: false,
+        condors: false,
+        rainCloud: false
+      },
+      {
+        dropInterval: 1500,
+        speed: 4000,
+        goal: 25,
+        starTypes: [
+          { type: 'normal', prob: 0.5, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
+          { type: 'rainbow', prob: 0.4, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
+          { type: 'diamond', prob: 0.1, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' }
+        ],
+        clouds: false,
+        condors: false,
+        rainCloud: false
+      },
+      {
+        dropInterval: 1000,
+        speed: 4000,
+        goal: 55,
+        starTypes: [
+          { type: 'normal', prob: 0.1, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
+          { type: 'rainbow', prob: 0.5, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
+          { type: 'diamond', prob: 0.4, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' }
+        ],
+        gentle: true,
+        swayAmplitude: 60,
+        clouds: false,
+        condors: false,
+        rainCloud: false
+      },
+      {
+        dropInterval: 1000,
+        speed: 4000,
+        goal: 55,
+        starTypes: [
+          { type: 'normal', prob: 0.1, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
+          { type: 'rainbow', prob: 0.5, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
+          { type: 'diamond', prob: 0.4, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' }
+        ],
+        gentle: true,
+        clouds: true,
+        swayAmplitude: 40,
+        condors: false,
+        rainCloud: false
+      },
+      {
+        dropInterval: 800,
+        speed: 4000,
+        goal: 65,
+        starTypes: [
+          { type: 'normal', prob: 0.1, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
+          { type: 'rainbow', prob: 0.4, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
+          { type: 'diamond', prob: 0.5, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' }
+        ],
+        gentle: true,
+        swayAmplitude: 30,
+        clouds: false,
+        condors: true,
+        rainCloud: false
+      },
+      {
+        dropInterval: 700,
+        speed: 4000,
+        goal: 70, // 目標スコアを80から70に変更
+        starTypes: [
+          { type: 'normal', prob: 0.1, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
+          { type: 'rainbow', prob: 0.3, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
+          { type: 'diamond', prob: 0.6, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' }
+        ],
+        gentle: true,
+        swayAmplitude: 30,
+        clouds: false,
+        condors: false,
+        rainCloud: true
+      },
+      {
+        dropInterval: 600,
+        speed: 4000,
+        goal: 45,
+        starTypes: [
+          { type: 'normal', prob: 0.2, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
+          { type: 'rainbow', prob: 0.2, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
+          { type: 'diamond', prob: 0.2, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' },
+          { type: 'leaf', prob: 0.4, score: 0, sound: 'sound-pop', img: 'leaf.png' }
+        ],
+        gentle: true,
+        swayAmplitude: 40,
+        clouds: true,
+        condors: false,
+        rainCloud: false,
+        fox: true
+      }
+    ];
 
-        const nativeWisdom = [
-            "ラムビー族の格言: 知識ではなく、智恵を求めよ。知識は産物だが、智恵は未来をもたらす。",
-            "チェロキー族の格言: 日と夜、季節、星、太陽。その移ろいを見れば、ひとより偉大な何かの存在を思わずにはいられない。",
-            "ショショネ族の格言: 自分より偉大なものには、つねに畏敬の念をもて。",
-            "ホピ族の格言: 善人にも、悪人にも雨は降り、陽は昇る。",
-            "ラコタ族の格言: 創世記はいまも続いている。",
-            "アパッチ族の格言: まっすぐに、しゃべれば、光線のように、こころに届く。",
-            "ホピ族の格言: かんしゃくを起こすと、友人を失う。嘘をつくと、自分自身を失う。",
-            "オハマ族の伝承: 親切とは、言葉をつつしみ、人を傷つけないように心がけることだ。",
-            "ホピ族の格言: 慎ましく食べ、慎んでしゃべる。そして誰も傷つけない。",
-            "ソーク族の格言: 私の前を歩くな、私が従うとは限らない。私の後を歩くな、私が導くとは限らない。私と共に歩け、私たちはひとつなのだから。",
-            "ミンカス族の格言: 感謝する理由がみつからなければ落ち度はあなた自身にある。",
-            "ダコタ族の格言: 歩いた足跡でひとは永遠に知られる。",
-            "ナバホ族の格言: 思考は矢のように放たれたら、的を射る。注意しないと自分の放った矢で倒れることになる。",
-            "ホピ族の格言: 怒りは自分に盛る毒。",
-            "ドゥワミッシュ族の格言: 死は存在しない生きる世界が変わるだけだ。",
-            "シャイアン族の格言: 目で判断せずに、こころで判断しろ。",
-            "オマハ族の格言: 過ちを見てそれを正そうとしなければ過ちを犯した者と同罪だ。",
-            "ナバホ族: 素晴らしい夢を見てそれを行動に移せ。",
-            "チェロキー族の格言: 昨日のことで今日を消耗させてはならない。",
-            "オノンダガ族: 秘密などというものはない。謎などというものもない。それらはただの常識にすぎない。",
-            "ホピ族の格言: 泣くことをおそれずに。泣くことは、悲しみにあふれたあなたのこころを解き放つ。",
-            "オグララ・ラコタ族の格言: 真実の言葉とは、深くこころに沈んでそこにとどまるもの。",
-            "オクラホマ族の格言: 飢えた人間は狼と一緒でも食べる。",
-            "ホピ族の格言: 1本の指では小石すら持ち上げられぬ。",
-            "アパッチ族の格言: 見た目のよい男というものが、ただ顔の造作がよいだけのこともある。",
-            "オグララ・ラコタ族の格言: 宇宙はわれわれひとりひとりのなかにある。",
-            "ラコタ族の格言: 貧乏は謙遜の首を縄で絞めながら、神と人間にたいする無礼を飼育する。",
-            "モホーク族の格言: 人生はあげることと、もらうことの両方である。",
-            "パウニー族の格言: 宗教はひとつのこらず神のもとに帰るための足がかりにすぎない。",
-            "オマハ族の格言: いのちあるものすべてにいたわりを。",
-            "ドゥワミッシュ族の格言: わたしが愛するのは、お金への愛に生きていない人たち。",
-            "アラバホ族の格言: あぶく銭は怠け者をつくる。",
-            "ソーク族の格言: 師は教えることでまた学んでいる。",
-            "アパッチ族の格言: 神の名は無意味、世界にとってほんとうの神はあいなのだ。",
-            "アラバホ族の格言: 少しずつ少しずつ行けるところまで進む。",
-            "ポウニー族の格言: 死はつねに季節はずれにやってくる。",
-            "スー族の格言: ひとびとのこころに真の平和が宿るまで、国と国との間に平和はやってこない。",
-            "イロコイ族の格言: どんなことも7世代先まで考えて決めなければならない。"
-        ];
+    const nativeWisdom = [
+      "ラムビー族の格言: 知識ではなく、智恵を求めよ。知識は産物だが、智恵は未来をもたらす。",
+      "チェロキー族の格言: 日と夜、季節、星、太陽。その移ろいを見れば、ひとより偉大な何かの存在を思わずにはいられない。",
+      "ショショネ族の格言: 自分より偉大なものには、つねに畏敬の念をもて。",
+      "ホピ族の格言: 善人にも、悪人にも雨は降り、陽は昇る。",
+      "ラコタ族の格言: 創世記はいまも続いている。",
+      "アパッチ族の格言: まっすぐに、しゃべれば、光線のように、こころに届く。",
+      "ホピ族の格言: かんしゃくを起こすと、友人を失う。嘘をつくと、自分自身を失う。",
+      "オハマ族の伝承: 親切とは、言葉をつつしみ、人を傷つけないように心がけることだ。",
+      "ホピ族の格言: 慎ましく食べ、慎んでしゃべる。そして誰も傷つけない。",
+      "ソーク族の格言: 私の前を歩くな、私が従うとは限らない。私の後を歩くな、私が導くとは限らない。私と共に歩け、私たちはひとつなのだから。",
+      "ミンカス族の格言: 感謝する理由がみつからなければ落ち度はあなた自身にある。",
+      "ダコタ族の格言: 歩いた足跡でひとは永遠に知られる。",
+      "ナバホ族の格言: 思考は矢のように放たれたら、的を射る。注意しないと自分の放った矢で倒れることになる。",
+      "ホピ族の格言: 怒りは自分に盛る毒。",
+      "ドゥワミッシュ族の格言: 死は存在しない生きる世界が変わるだけだ。",
+      "シャイアン族の格言: 目で判断せずに、こころで判断しろ。",
+      "オマハ族の格言: 過ちを見てそれを正そうとしなければ過ちを犯した者と同罪だ。",
+      "ナバホ族: 素晴らしい夢を見てそれを行動に移せ。",
+      "チェロキー族の格言: 昨日のことで今日を消耗させてはならない。",
+      "オノンダガ族: 秘密などというものはない。謎などというものもない。それらはただの常識にすぎない。",
+      "ホピ族の格言: 泣くことをおそれずに。泣くことは、悲しみにあふれたあなたのこころを解き放つ。",
+      "オグララ・ラコタ族の格言: 真実の言葉とは、深くこころに沈んでそこにとどまるもの。",
+      "オクラホマ族の格言: 飢えた人間は狼と一緒でも食べる。",
+      "ホピ族の格言: 1本の指では小石すら持ち上げられぬ。",
+      "アパッチ族の格言: 見た目のよい男というものが、ただ顔の造作がよいだけのこともある。",
+      "オグララ・ラコタ族の格言: 宇宙はわれわれひとりひとりのなかにある。",
+      "ラコタ族の格言: 貧乏は謙遜の首を縄で絞めながら、神と人間にたいする無礼を飼育する。",
+      "モホーク族の格言: 人生はあげることと、もらうことの両方である。",
+      "パウニー族の格言: 宗教はひとつのこらず神のもとに帰るための足がかりにすぎない。",
+      "オマハ族の格言: いのちあるものすべてにいたわりを。",
+      "ドゥワミッシュ族の格言: わたしが愛するのは、お金への愛に生きていない人たち。",
+      "アラバホ族の格言: あぶく銭は怠け者をつくる。",
+      "ソーク族の格言: 師は教えることでまた学んでいる。",
+      "アパッチ族の格言: 神の名は無意味、世界にとってほんとうの神はあいなのだ。",
+      "アラバホ族の格言: 少しずつ少しずつ行けるところまで進む。",
+      "ポウニー族の格言: 死はつねに季節はずれにやってくる。",
+      "スー族の格言: ひとびとのこころに真の平和が宿るまで、国と国との間に平和はやってこない。",
+      "イロコイ族の格言: どんなことも7世代先まで考えて決めなければならない。"
+    ];
 
-        let stage = 0, score = 0, time = 30, interval, timer, running = false;
-        let currentStage;
+    let stage = 0, score = 0, time = 30, interval, timer, running = false;
+    let isStunned = false;
+    let currentStage;
+    let rainCloudTimeout, lightningIntervals = [];
+    let foxFadeInTimeout;
 
-        const raccoon = document.getElementById('raccoon');
-        const area = document.getElementById('game-area');
-        const scoreEl = document.getElementById('score');
-        const timerEl = document.getElementById('timer');
-        const stageEl = document.getElementById('stage');
-        const message = document.getElementById('message-overlay');
-        const messageContent = document.getElementById('message-content');
-        const wisdomEl = document.getElementById('wisdom');
-        const startButton = document.getElementById('start-button');
-        const nextButton = document.getElementById('next-button');
-        const retryButton = document.getElementById('retry-button');
-        const pop = document.getElementById('sound-pop');
-        const clearBgm = document.getElementById('bgm-clear');
-        const failBgm = document.getElementById('bgm-fail');
-        const mainBgm = document.getElementById('bgm-main');
+    const raccoon = document.getElementById('raccoon');
+    const area = document.getElementById('game-area');
+    const scoreEl = document.getElementById('score');
+    const timerEl = document.getElementById('timer');
+    const stageEl = document.getElementById('stage');
+    const message = document.getElementById('message-overlay');
+    const messageContent = document.getElementById('message-content');
+    const wisdomEl = document.getElementById('wisdom');
+    const startButton = document.getElementById('start-button');
+    const nextButton = document.getElementById('next-button');
+    const retryButton = document.getElementById('retry-button');
+    const pop = document.getElementById('sound-pop');
+    const clearBgm = document.getElementById('bgm-clear');
+    const failBgm = document.getElementById('bgm-fail');
+    const mainBgm = document.getElementById('bgm-main');
+    const rainCloud = document.getElementById('rain-cloud');
+    const fox = document.getElementById('fox');
 
-        const condor = document.getElementById('condor');
-        let condorCollisionCheckInterval;
-        let condorStarChild = null;
+    const condor = document.getElementById('condor');
+    let condorCollisionCheckInterval;
+    let condorStarChild = null;
 
-        const imageFiles = ['background.PNG', 'kokopelli.PNG', 'raccoon.PNG', 'star_normal.png', 'star_rainbow.png', 'star_diamond.png', 'cloud.PNG', 'rlcondor.PNG', 'lrcondor.PNG'];
-        imageFiles.forEach(file => {
-            const img = new Image();
-            img.src = file;
-        });
-        
-        function getRandomStarType() {
-            const rand = Math.random();
-            let cumulativeProb = 0;
+    const imageFiles = ['background.PNG', 'kokopelli.PNG', 'raccoon.PNG', 'star_normal.png', 'star_rainbow.png', 'star_diamond.png', 'leaf.png', 'cloud.PNG', 'rlcondor.PNG', 'lrcondor.PNG', 'rain-cloud.PNG', 'lightning.PNG', 'fox.PNG'];
+    imageFiles.forEach(file => {
+      const img = new Image();
+      img.src = file;
+    });
+     
+    function getRandomStarType() {
+      const rand = Math.random();
+      let cumulativeProb = 0;
 
-            for (const starType of currentStage.starTypes) {
-                cumulativeProb += starType.prob;
-                if (rand <= cumulativeProb) {
-                    return starType;
-                }
-            }
-            return currentStage.starTypes[0];
+      for (const starType of currentStage.starTypes) {
+        cumulativeProb += starType.prob;
+        if (rand <= cumulativeProb) {
+          return starType;
         }
+      }
+      return currentStage.starTypes[0];
+    }
 
-        function getRandomWisdom() {
-            return nativeWisdom[Math.floor(Math.random() * nativeWisdom.length)];
+    function getRandomWisdom() {
+      return nativeWisdom[Math.floor(Math.random() * nativeWisdom.length)];
+    }
+
+    function spawnStar() {
+      if (!running) return;
+      const star = document.createElement('img');
+      const starType = getRandomStarType();
+
+      star.src = starType.img;
+      star.className = `star visible ${starType.type}`;
+       
+      star.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+
+      if (currentStage.gentle) {
+        star.style.setProperty('--gentle-sway-amplitude', `${currentStage.swayAmplitude || 60}px`);
+        star.classList.add('gentle-drop');
+      } else {
+        const swayAmplitude = 50 + Math.random() * 50;
+        star.classList.add('normal-drop');
+        star.style.setProperty('--sway-amplitude', `${swayAmplitude}px`);
+      }
+
+      area.appendChild(star);
+      pop.play();
+       
+      star.collisionCheck = setInterval(() => {
+        if (!star || star.classList.contains('is-grabbed')) {
+          clearInterval(star.collisionCheck);
+          return;
         }
+        const starRect = star.getBoundingClientRect();
+        const raccoonRect = raccoon.getBoundingClientRect();
 
-        function spawnStar() {
-            if (!running) return;
-            const star = document.createElement('img');
-            const starType = getRandomStarType();
-
-            star.src = starType.img;
-            star.className = `star visible ${starType.type}`;
-
-            if (currentStage.gentle) {
-                star.style.setProperty('--gentle-sway-amplitude', `${currentStage.swayAmplitude || 60}px`);
-                star.classList.add('gentle-drop');
-            } else {
-                const swayAmplitude = 50 + Math.random() * 50;
-                star.classList.add('normal-drop');
-                star.style.setProperty('--sway-amplitude', `${swayAmplitude}px`);
-            }
-            
-            star.style.left = Math.random() * (window.innerWidth - 50) + 'px';
-
-            area.appendChild(star);
+        if (starRect.bottom >= raccoonRect.top &&
+          starRect.left < raccoonRect.right &&
+          starRect.right > raccoonRect.left && !isStunned) {
+          score += starType.score;
+          scoreEl.textContent = score;
+          if(starType.sound === 'sound-pop' || starType.score === 0) {
             pop.play();
-            
-            star.collisionCheck = setInterval(() => {
-                if (!star || star.classList.contains('is-grabbed')) {
-                    clearInterval(star.collisionCheck);
-                    return;
-                }
-                const starRect = star.getBoundingClientRect();
-                const raccoonRect = raccoon.getBoundingClientRect();
-
-                if (starRect.bottom >= raccoonRect.top &&
-                    starRect.left < raccoonRect.right &&
-                    starRect.right > raccoonRect.left) {
-                    score += starType.score;
-                    scoreEl.textContent = score;
-                    document.getElementById(starType.sound).play();
-                    star.remove();
-                    clearInterval(star.collisionCheck);
-                } else if (starRect.top > window.innerHeight) {
-                    star.remove();
-                    clearInterval(star.collisionCheck);
-                }
-            }, 50);
+          } else {
+            document.getElementById(starType.sound).play();
+          }
+          star.remove();
+          clearInterval(star.collisionCheck);
+        } else if (starRect.top > window.innerHeight) {
+          star.remove();
+          clearInterval(star.collisionCheck);
         }
+      }, 50);
+    }
+     
+    function spawnLightningAtCurrentPos() {
+      if (!running) return;
+      const lightning = document.createElement('img');
+      lightning.src = 'lightning.PNG';
+      lightning.classList.add('lightning');
 
-        function createCloud(id, top, delay) {
+      const rainCloudRect = rainCloud.getBoundingClientRect();
+      const lightningWidth = 50;
+      const lightningLeft = rainCloudRect.left + (rainCloudRect.width / 2) - (lightningWidth / 2);
+
+      lightning.style.left = `${lightningLeft}px`;
+      lightning.style.top = `${rainCloudRect.bottom}px`;
+
+      area.appendChild(lightning);
+
+      lightning.collisionCheck = setInterval(() => {
+        const lightningRect = lightning.getBoundingClientRect();
+        const raccoonRect = raccoon.getBoundingClientRect();
+
+        // 雷の当たり判定を画像サイズから少し狭める
+        const lightningCollisionBox = {
+          left: lightningRect.left + 15, // 左から15px内側
+          right: lightningRect.right - 15, // 右から15px内側
+          top: lightningRect.top,
+          bottom: lightningRect.bottom
+        };
+         
+        // 矩形同士が重なっているかを判定
+        if (lightningCollisionBox.left < raccoonRect.right &&
+          lightningCollisionBox.right > raccoonRect.left &&
+          lightningCollisionBox.top < raccoonRect.bottom &&
+          lightningCollisionBox.bottom > raccoonRect.top) {
+           
+          clearInterval(lightning.collisionCheck);
+          lightning.remove();
+          stunRaccoon();
+        } else if (lightningRect.top > window.innerHeight) {
+          clearInterval(lightning.collisionCheck);
+          lightning.remove();
+        }
+      }, 50);
+    }
+
+    function dropLightningSequence() {
+      if (!running) return;
+      let lightningSpawned = 0;
+      const lightningInterval = setInterval(() => {
+        if (lightningSpawned < 3) {
+          spawnLightningAtCurrentPos();
+          lightningSpawned++;
+        } else {
+          clearInterval(lightningInterval);
+        }
+      }, 1000);
+      lightningIntervals.push(lightningInterval);
+    }
+
+    function startRainCloudEvent() {
+      if (!running) return;
+
+      // 1. 中央に5秒間
+      rainCloud.style.left = '50%';
+      rainCloud.style.transform = 'translateX(-50%)';
+      rainCloud.style.opacity = 1;
+      rainCloudTimeout = setTimeout(() => {
+        dropLightningSequence();
+
+        // 2. 左端に移動し、5秒間雷を落とす
+        rainCloudTimeout = setTimeout(() => {
+          if (!running) return;
+          rainCloud.style.left = '0';
+          rainCloud.style.transform = 'translateX(0)';
+          dropLightningSequence();
+
+          // 3. 右端に移動し、5秒間雷を落とす
+          rainCloudTimeout = setTimeout(() => {
             if (!running) return;
-            const cloud = document.createElement('img');
-            cloud.src = 'cloud.PNG';
-            cloud.classList.add('cloud', 'move');
-            cloud.style.top = top;
-            cloud.style.animationDelay = `${delay}s`;
-            area.appendChild(cloud);
-            cloud.addEventListener('animationend', () => {
-                cloud.remove();
-                createCloud(id, top, delay);
-            });
-        }
+            rainCloud.style.left = 'calc(100% - 300px)';
+            rainCloud.style.transform = 'translateX(0)';
+            dropLightningSequence();
 
-        function startCloudAnimation() {
-            document.querySelectorAll('.cloud').forEach(el => el.remove());
-            createCloud('cloud-top', '15%', 0);
-            createCloud('cloud-middle', '45%', 3);
-            createCloud('cloud-bottom', '75%', 6);
-        }
+            rainCloudTimeout = setTimeout(() => {
+              // 終了
+              rainCloud.style.opacity = 0;
+            }, 5000); // 右端で5秒間
+          }, 5000); // 左端で5秒間
+        }, 5000); // 中央で5秒間
+      }, 5000); // ステージ開始から5秒後
+    }
 
-        function flyCondor() {
-            if (!running) return;
-            
-            let topPosition, animationClass, condorImageSrc;
-            const rand = Math.random();
+    function stunRaccoon() {
+      if (isStunned) return;
+      isStunned = true;
+      raccoon.classList.add('hit');
+       
+      setTimeout(() => {
+        isStunned = false;
+        raccoon.classList.remove('hit');
+      }, 2000);
+    }
 
-            if (rand < 0.5) {
-                topPosition = '10%';
-                animationClass = 'condor-flight-left';
-                condorImageSrc = 'rlcondor.PNG';
-            } else {
-                topPosition = '30%';
-                animationClass = 'condor-flight-right';
-                condorImageSrc = 'lrcondor.PNG';
-            }
+    function createCloud(id, top, delay) {
+      if (!running) return;
+      const cloud = document.createElement('img');
+      cloud.src = 'cloud.PNG';
+      cloud.classList.add('cloud', 'move');
+      cloud.style.top = top;
+      cloud.style.animationDelay = `${delay}s`;
+      area.appendChild(cloud);
+      cloud.addEventListener('animationend', () => {
+        cloud.remove();
+        createCloud(id, top, delay);
+      });
+    }
 
-            condor.src = condorImageSrc;
-            condor.style.top = topPosition;
-            condor.classList.remove('condor-flight-left', 'condor-flight-right');
-            condor.style.left = (animationClass === 'condor-flight-left') ? '100vw' : '-150px';
-            condor.style.display = 'block';
+    function startCloudAnimation() {
+      document.querySelectorAll('.cloud').forEach(el => el.remove());
+      createCloud('cloud-top', '15%', 0);
+      createCloud('cloud-middle', '45%', 3);
+      createCloud('cloud-bottom', '75%', 6);
+    }
 
-            setTimeout(() => {
-                condor.classList.add(animationClass);
-            }, 10);
-            
-            const animationEndHandler = (e) => {
-                if (e.animationName === 'fly-left' || e.animationName === 'fly-right') {
-                    condor.removeEventListener('animationend', animationEndHandler);
-                    if (condorStarChild) {
-                        condorStarChild.remove();
-                        condorStarChild = null;
-                    }
-                    if (running) {
-                        flyCondor();
-                    } else {
-                        condor.style.display = 'none';
-                    }
-                }
-            };
-            condor.addEventListener('animationend', animationEndHandler);
-        }
+    function flyCondor() {
+      if (!running) return;
+       
+      let topPosition, animationClass, condorImageSrc;
+      const rand = Math.random();
 
-        function startCondorCollisionCheck() {
-            condorCollisionCheckInterval = setInterval(() => {
-                if (!running) {
-                    clearInterval(condorCollisionCheckInterval);
-                    return;
-                }
-                
-                if (condorStarChild) {
-                    const condorCurrentRect = condor.getBoundingClientRect();
-                    condorStarChild.style.left = `${condorCurrentRect.left + condorCurrentRect.width / 2}px`;
-                    condorStarChild.style.top = `${condorCurrentRect.top + condorCurrentRect.height / 2}px`;
-                    return;
-                }
+      if (rand < 0.5) {
+        topPosition = '10%';
+        animationClass = 'condor-flight-left';
+        condorImageSrc = 'rlcondor.PNG';
+      } else {
+        topPosition = '30%';
+        animationClass = 'condor-flight-right';
+        condorImageSrc = 'lrcondor.PNG';
+      }
 
-                const condorRect = condor.getBoundingClientRect();
-                const stars = document.querySelectorAll('.star.visible');
+      condor.src = condorImageSrc;
+      condor.style.top = topPosition;
+      condor.classList.remove('condor-flight-left', 'condor-flight-right');
+      condor.style.left = (animationClass === 'condor-flight-left') ? '100vw' : '-150px';
+      condor.style.display = 'block';
 
-                stars.forEach(star => {
-                    const starRect = star.getBoundingClientRect();
-                    
-                    if (starRect.bottom >= condorRect.top &&
-                        starRect.top <= condorRect.bottom &&
-                        starRect.left <= condorRect.right &&
-                        starRect.right >= condorRect.left) {
-                        
-                        star.isGrabbed = true;
-                        star.classList.add('is-grabbed');
-                        condorStarChild = star;
-                        clearInterval(star.collisionCheck);
-                    }
-                });
-            }, 50);
-        }
-
-        function startStage() {
-            currentStage = stages[stage];
-            score = 0;
-            time = 30;
-            scoreEl.textContent = score;
-            timerEl.textContent = time;
-            stageEl.textContent = stage + 1;
-            message.style.display = 'none';
-            running = true;
+      setTimeout(() => {
+        condor.classList.add(animationClass);
+      }, 10);
+       
+      const animationEndHandler = (e) => {
+        if (e.animationName === 'fly-left' || e.animationName === 'fly-right') {
+          condor.removeEventListener('animationend', animationEndHandler);
+          if (condorStarChild) {
+            condorStarChild.remove();
             condorStarChild = null;
-
-            if (mainBgm.paused) {
-                mainBgm.currentTime = 0;
-                mainBgm.play();
-            }
-
-            document.querySelectorAll('.star').forEach(el => el.remove());
-            document.querySelectorAll('.cloud').forEach(el => el.remove());
-
-            if (currentStage.clouds) {
-                startCloudAnimation();
-            }
-
-            if (currentStage.condors) {
-                if (!condor.classList.contains('condor-flight-left') && !condor.classList.contains('condor-flight-right')) {
-                    flyCondor();
-                }
-                if (!condorCollisionCheckInterval) {
-                    startCondorCollisionCheck();
-                }
-            } else {
-                clearInterval(condorCollisionCheckInterval);
-                condorCollisionCheckInterval = null;
-                condor.style.display = 'none';
-                condor.classList.remove('condor-flight-left', 'condor-flight-right');
-            }
-            
-            interval = setInterval(spawnStar, currentStage.dropInterval);
-            timer = setInterval(() => {
-                time--;
-                timerEl.textContent = time;
-                if (time <= 0) endStage();
-            }, 1000);
-        }
-
-        function endStage() {
-            clearInterval(interval);
-            clearInterval(timer);
-            running = false;
-
-            mainBgm.pause();
-
-            document.querySelectorAll('.cloud').forEach(el => el.remove());
-            clearInterval(condorCollisionCheckInterval);
-            condorCollisionCheckInterval = null;
-            if (condorStarChild) {
-                condorStarChild.remove();
-                condorStarChild = null;
-            }
+          }
+          if (running) {
+            flyCondor();
+          } else {
             condor.style.display = 'none';
-            condor.classList.remove('condor-flight-left', 'condor-flight-right');
+          }
+        }
+      };
+      condor.addEventListener('animationend', animationEndHandler);
+    }
 
-            if (score >= currentStage.goal) {
-                clearBgm.play();
-                if (stage + 1 === stages.length) {
-                    messageContent.innerHTML = `<h2>ステージクリア！おめでとう！</h2><p>最終スコア: ${score}</p>`;
-                    nextButton.style.display = 'none';
-                } else {
-                    messageContent.innerHTML = `<h2>ステージ${stage + 1} クリア！</h2><p>獲得スコア: ${score}</p>`;
-                    nextButton.style.display = 'block';
-                }
-                wisdomEl.textContent = getRandomWisdom();
-                startButton.style.display = 'none';
-            } else {
-                failBgm.play();
-                messageContent.innerHTML = `<h2>ステージ${stage + 1} 失敗</h2><p>目標スコア: ${currentStage.goal}</p>`;
-                wisdomEl.textContent = getRandomWisdom();
-                nextButton.style.display = 'none';
-                startButton.style.display = 'none';
-            }
-            retryButton.style.display = 'block';
-            message.style.display = 'flex';
+    function startCondorCollisionCheck() {
+      condorCollisionCheckInterval = setInterval(() => {
+        if (!running) {
+          clearInterval(condorCollisionCheckInterval);
+          return;
+        }
+         
+        if (condorStarChild) {
+          const condorCurrentRect = condor.getBoundingClientRect();
+          condorStarChild.style.left = `${condorCurrentRect.left + condorCurrentRect.width / 2}px`;
+          condorStarChild.style.top = `${condorCurrentRect.top + condorCurrentRect.height / 2}px`;
+          return;
         }
 
-        function showStartScreen() {
-            messageContent.innerHTML = '<h2>ココペリオン<br>〜知恵の星を集めよう〜</h2><p>アライグマを操作して、空から降ってくる「知恵の星」を集めよう！</p>';
-            wisdomEl.textContent = getRandomWisdom();
-            startButton.style.display = 'block';
-            nextButton.style.display = 'none';
-            retryButton.style.display = 'none';
-            message.style.display = 'flex';
-            stage = 0;
+        const condorRect = condor.getBoundingClientRect();
+        const stars = document.querySelectorAll('.star.visible');
+
+        stars.forEach(star => {
+          const starRect = star.getBoundingClientRect();
+           
+          if (starRect.bottom >= condorRect.top &&
+            starRect.top <= condorRect.bottom &&
+            starRect.left <= condorRect.right &&
+            starRect.right >= condorRect.left) {
+             
+            star.isGrabbed = true;
+            star.classList.add('is-grabbed');
+            condorStarChild = star;
+            clearInterval(star.collisionCheck);
+          }
+        });
+      }, 50);
+    }
+    
+    function startStage() {
+      if (stage >= stages.length) {
+        showFinalScreen();
+        return;
+      }
+      currentStage = stages[stage];
+      score = 0;
+      time = 30;
+      scoreEl.textContent = score;
+      timerEl.textContent = time;
+      stageEl.textContent = stage + 1;
+      message.style.display = 'none';
+      running = true;
+      isStunned = false;
+      condorStarChild = null;
+
+      if (mainBgm.paused) {
+        mainBgm.currentTime = 0;
+        mainBgm.play();
+      }
+
+      document.querySelectorAll('.star').forEach(el => el.remove());
+      document.querySelectorAll('.cloud').forEach(el => el.remove());
+      document.querySelectorAll('.lightning').forEach(el => {
+        clearInterval(el.collisionCheck);
+        el.remove();
+      });
+      clearTimeout(rainCloudTimeout);
+      lightningIntervals.forEach(clearInterval);
+      lightningIntervals = [];
+
+      // 全ステージのギミックをリセット
+      fox.style.opacity = 0;
+      fox.style.display = 'none';
+      clearTimeout(foxFadeInTimeout);
+      rainCloud.style.opacity = 0;
+      condor.style.display = 'none';
+      clearInterval(condorCollisionCheckInterval);
+      condorCollisionCheckInterval = null;
+
+      if (currentStage.clouds) {
+        startCloudAnimation();
+      }
+
+      if (currentStage.condors) {
+        if (!condor.classList.contains('condor-flight-left') && !condor.classList.contains('condor-flight-right')) {
+          flyCondor();
         }
+        if (!condorCollisionCheckInterval) {
+          startCondorCollisionCheck();
+        }
+      }
 
-        startButton.addEventListener('click', () => {
-            mainBgm.currentTime = 0;
-            mainBgm.play();
-            startStage();
-        });
-        nextButton.addEventListener('click', () => {
-            stage++;
-            mainBgm.currentTime = 0;
-            mainBgm.play();
-            startStage();
-        });
-        retryButton.addEventListener('click', () => {
-            mainBgm.currentTime = 0;
-            mainBgm.play();
-            startStage();
-        });
+      if (currentStage.rainCloud) {
+        startRainCloudEvent();
+      }
 
-        let touchStartX = 0;
-        let raccoonStartX = 0;
+      if (currentStage.fox) {
+        fox.style.display = 'block';
+        foxFadeInTimeout = setTimeout(() => {
+          fox.style.opacity = 1;
+        }, 3000);
+      }
+       
+      interval = setInterval(spawnStar, currentStage.dropInterval);
+      timer = setInterval(() => {
+        time--;
+        timerEl.textContent = time;
+        if (time <= 0) endStage();
+      }, 1000);
+    }
 
-        window.addEventListener('touchstart', (e) => {
-            if (!running) return;
-            touchStartX = e.touches[0].clientX;
-            raccoonStartX = raccoon.offsetLeft;
-        });
+    function endStage() {
+      clearInterval(interval);
+      clearInterval(timer);
+      running = false;
 
-        window.addEventListener('touchmove', (e) => {
-            if (!running) return;
-            const touchX = e.touches[0].clientX;
-            const deltaX = touchX - touchStartX;
-            let newLeft = raccoonStartX + deltaX;
+      mainBgm.pause();
 
-            newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
-            raccoon.style.left = `${newLeft}px`;
-            raccoon.style.transform = 'translateX(0)';
-        });
+      document.querySelectorAll('.star').forEach(el => {
+          clearInterval(el.collisionCheck);
+          el.remove();
+      });
+      document.querySelectorAll('.cloud').forEach(el => el.remove());
+      document.querySelectorAll('.lightning').forEach(el => {
+        clearInterval(el.collisionCheck);
+        el.remove();
+      });
+      clearTimeout(rainCloudTimeout);
+      lightningIntervals.forEach(clearInterval);
+      lightningIntervals = [];
 
-        let isDragging = false;
-        let mouseStartX = 0;
-        let mouseRaccoonStartX = 0;
+      clearInterval(condorCollisionCheckInterval);
+      condorCollisionCheckInterval = null;
+      if (condorStarChild) {
+        condorStarChild.remove();
+        condorStarChild = null;
+      }
+      condor.style.display = 'none';
+      condor.classList.remove('condor-flight-left', 'condor-flight-right');
+      rainCloud.style.opacity = 0;
+      raccoon.classList.remove('hit');
+      raccoon.style.opacity = 1;
+      
+      fox.style.opacity = 0;
+      fox.style.display = 'none';
+      clearTimeout(foxFadeInTimeout);
 
-        raccoon.addEventListener('mousedown', (e) => {
-            if (!running) return;
-            isDragging = true;
-            mouseStartX = e.clientX;
-            mouseRaccoonStartX = raccoon.offsetLeft;
-            e.preventDefault();
-        });
+      if (score >= currentStage.goal) {
+        clearBgm.play();
+        if (stage + 1 === stages.length) {
+          messageContent.innerHTML = `<h2>最終ステージクリア！おめでとう！</h2><p>最終スコア: ${score}</p>`;
+          nextButton.style.display = 'none';
+          retryButton.style.display = 'block';
+        } else {
+          messageContent.innerHTML = `<h2>ステージ${stage + 1} クリア！</h2><p>獲得スコア: ${score}</p>`;
+          nextButton.style.display = 'block';
+          retryButton.style.display = 'none';
+        }
+        wisdomEl.textContent = getRandomWisdom();
+        startButton.style.display = 'none';
+      } else {
+        failBgm.play();
+        messageContent.innerHTML = `<h2>ステージ${stage + 1} 失敗</h2><p>目標スコア: ${currentStage.goal}</p>`;
+        wisdomEl.textContent = getRandomWisdom();
+        nextButton.style.display = 'none';
+        startButton.style.display = 'none';
+        retryButton.style.display = 'block';
+      }
+      message.style.display = 'flex';
+    }
 
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging || !running) return;
-            const deltaX = e.clientX - mouseStartX;
-            let newLeft = mouseRaccoonStartX + deltaX;
+    function showStartScreen() {
+      messageContent.innerHTML = '<h2>ココペリオン<br>〜知恵の星を集めよう〜</h2><p>アライグマを操作して、空から降ってくる「知恵の星」を集めよう！</p>';
+      wisdomEl.textContent = getRandomWisdom();
+      startButton.style.display = 'block';
+      nextButton.style.display = 'none';
+      retryButton.style.display = 'none';
+      message.style.display = 'flex';
+      stage = 0;
+      score = 0;
+    }
 
-            newLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
-            raccoon.style.left = `${newLeft}px`;
-        });
+    function showFinalScreen() {
+      messageContent.innerHTML = `<h2>ココペリオン 卒業！</h2><p>すべてのステージをクリアしました。<br>あなたは星々がもたらす知恵をすべて集めました！<br>ココペリがあなたの成功を称えます。</p>`;
+      wisdomEl.textContent = getRandomWisdom();
+      startButton.textContent = '最初からプレイ';
+      startButton.style.display = 'block';
+      nextButton.style.display = 'none';
+      retryButton.style.display = 'none';
+      message.style.display = 'flex';
+      stage = 0;
+    }
 
-        window.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
+    startButton.addEventListener('click', () => {
+      mainBgm.currentTime = 0;
+      mainBgm.play();
+      if(startButton.textContent === '最初からプレイ') {
+        stage = 0;
+        startButton.textContent = 'スタート';
+      }
+      startStage();
+    });
+    nextButton.addEventListener('click', () => {
+      stage++;
+      mainBgm.currentTime = 0;
+      mainBgm.play();
+      startStage();
+    });
+    retryButton.addEventListener('click', () => {
+      mainBgm.currentTime = 0;
+      mainBgm.play();
+      startStage();
+    });
 
-        window.addEventListener('load', showStartScreen);
-    </script>
+    let isDragging = false;
+    let dragStartPos = 0;
+
+    function handleDragStart(e) {
+      if (!running || isStunned) return;
+      isDragging = true;
+      dragStartPos = (e.touches ? e.touches[0].clientX : e.clientX);
+      e.preventDefault();
+    }
+
+    function handleDragMove(e) {
+      if (!isDragging || !running || isStunned) return;
+      const currentPos = (e.touches ? e.touches[0].clientX : e.clientX);
+      const deltaX = currentPos - dragStartPos;
+      
+      const newLeft = raccoon.offsetLeft + deltaX;
+      
+      const limitedLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
+      raccoon.style.left = `${limitedLeft}px`;
+      
+      dragStartPos = currentPos;
+    }
+
+    function handleDragEnd() {
+      isDragging = false;
+    }
+
+    // Touch events for mobile
+    window.addEventListener('touchstart', handleDragStart);
+    window.addEventListener('touchmove', handleDragMove);
+    window.addEventListener('touchend', handleDragEnd);
+
+    // Mouse events for PC
+    window.addEventListener('mousedown', handleDragStart);
+    window.addEventListener('mousemove', handleDragMove);
+    window.addEventListener('mouseup', handleDragEnd);
+    
+    // PC向けのマウス追従性を高めるため、アライグマ本体ではなく、ウィンドウ全体でイベントを監視
+    raccoon.style.cursor = 'grab';
+
+    window.addEventListener('load', showStartScreen);
+  </script>
 </body>
 </html>
