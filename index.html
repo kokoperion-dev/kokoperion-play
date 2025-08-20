@@ -338,7 +338,7 @@
       {
         dropInterval: 700,
         speed: 4000,
-        goal: 70, // 目標スコアを80から70に変更
+        goal: 70,
         starTypes: [
           { type: 'normal', prob: 0.1, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
           { type: 'rainbow', prob: 0.3, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
@@ -358,7 +358,7 @@
           { type: 'normal', prob: 0.2, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
           { type: 'rainbow', prob: 0.2, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
           { type: 'diamond', prob: 0.2, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' },
-          { type: 'leaf', prob: 0.4, score: 0, sound: 'sound-pop', img: 'leaf.png' }
+          { type: 'leaf', prob: 0.4, score: 0, sound: 'sound-pop', img: 'Leaf.PNG' } // ファイル名を修正しました
         ],
         gentle: true,
         swayAmplitude: 40,
@@ -438,7 +438,7 @@
     let condorCollisionCheckInterval;
     let condorStarChild = null;
 
-    const imageFiles = ['background.PNG', 'kokopelli.PNG', 'raccoon.PNG', 'star_normal.png', 'star_rainbow.png', 'star_diamond.png', 'leaf.png', 'cloud.PNG', 'rlcondor.PNG', 'lrcondor.PNG', 'rain-cloud.PNG', 'lightning.PNG', 'fox.PNG'];
+    const imageFiles = ['background.PNG', 'kokopelli.PNG', 'raccoon.PNG', 'star_normal.png', 'star_rainbow.png', 'star_diamond.png', 'Leaf.PNG', 'cloud.PNG', 'rlcondor.PNG', 'lrcondor.PNG', 'rain-cloud.PNG', 'lightning.PNG', 'fox.PNG'];
     imageFiles.forEach(file => {
       const img = new Image();
       img.src = file;
@@ -885,26 +885,25 @@
     });
 
     let isDragging = false;
-    let dragStartPos = 0;
 
     function handleDragStart(e) {
       if (!running || isStunned) return;
       isDragging = true;
-      dragStartPos = (e.touches ? e.touches[0].clientX : e.clientX);
       e.preventDefault();
     }
 
+    // アライグマの移動コードを修正しました
     function handleDragMove(e) {
       if (!isDragging || !running || isStunned) return;
-      const currentPos = (e.touches ? e.touches[0].clientX : e.clientX);
-      const deltaX = currentPos - dragStartPos;
       
-      const newLeft = raccoon.offsetLeft + deltaX;
+      const currentClientX = (e.touches ? e.touches[0].clientX : e.clientX);
+      
+      const newLeft = currentClientX - (raccoon.offsetWidth / 2);
       
       const limitedLeft = Math.max(0, Math.min(window.innerWidth - raccoon.offsetWidth, newLeft));
-      raccoon.style.left = `${limitedLeft}px`;
       
-      dragStartPos = currentPos;
+      raccoon.style.left = `${limitedLeft}px`;
+      raccoon.style.transform = 'none';
     }
 
     function handleDragEnd() {
@@ -921,7 +920,6 @@
     window.addEventListener('mousemove', handleDragMove);
     window.addEventListener('mouseup', handleDragEnd);
     
-    // PC向けのマウス追従性を高めるため、アライグマ本体ではなく、ウィンドウ全体でイベントを監視
     raccoon.style.cursor = 'grab';
 
     window.addEventListener('load', showStartScreen);
