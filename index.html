@@ -68,6 +68,9 @@
     .star.diamond {
       width: 35px;
     }
+    .star.leaf {
+      width: 40px;
+    }
     .star.visible {
       opacity: 1;
     }
@@ -355,7 +358,7 @@
           { type: 'normal', prob: 0.2, score: 1, sound: 'sound-catch', img: 'star_normal.png' },
           { type: 'rainbow', prob: 0.2, score: 2, sound: 'sound-catch-rainbow', img: 'star_rainbow.png' },
           { type: 'diamond', prob: 0.2, score: 3, sound: 'sound-catch-diamond', img: 'star_diamond.png' },
-          { type: 'leaf', prob: 0.4, score: 1, sound: 'sound-pop', img: 'Leaf.PNG' }
+          { type: 'leaf', prob: 0.4, score: 0, sound: 'sound-pop', img: 'leaf.PNG' } // ファイル名を修正しました
         ],
         gentle: true,
         swayAmplitude: 40,
@@ -883,14 +886,13 @@
 
     let isDragging = false;
 
-    // マウス/タッチ操作を開始したときの関数
     function handleDragStart(e) {
       if (!running || isStunned) return;
       isDragging = true;
-      // この行を追加して、デフォルトのブラウザ操作を無効化
       e.preventDefault();
     }
 
+    // アライグマの移動コードを修正しました
     function handleDragMove(e) {
       if (!isDragging || !running || isStunned) return;
       
@@ -908,12 +910,12 @@
       isDragging = false;
     }
 
-    // アライグマの要素にイベントリスナーを設定
-    raccoon.addEventListener('touchstart', handleDragStart);
+    // Touch events for mobile
+    window.addEventListener('touchstart', handleDragStart);
     window.addEventListener('touchmove', handleDragMove);
     window.addEventListener('touchend', handleDragEnd);
 
-    // PC用のマウスイベントリスナーはそのまま
+    // Mouse events for PC
     window.addEventListener('mousedown', handleDragStart);
     window.addEventListener('mousemove', handleDragMove);
     window.addEventListener('mouseup', handleDragEnd);
@@ -924,4 +926,11 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
 
