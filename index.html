@@ -435,7 +435,7 @@
     let condorCollisionCheckInterval;
     let condorStarChild = null;
 
-    const imageFiles = ['background.PNG', 'kokopelli.PNG', 'raccoon.PNG', 'star_normal.png', 'star_rainbow.png', 'star_diamond.png', 'cloud.PNG', 'rlcondor.PNG', 'lrcondor.PNG', 'rain-cloud.PNG', 'lightning.PNG', 'fox.PNG'];
+    const imageFiles = ['background.PNG', 'kokopelli.PNG', 'raccoon.PNG', 'star_normal.png', 'star_rainbow.png', 'star_diamond.png', 'Leaf.PNG', 'cloud.PNG', 'rlcondor.PNG', 'lrcondor.PNG', 'rain-cloud.PNG', 'lightning.PNG', 'fox.PNG'];
     imageFiles.forEach(file => {
       const img = new Image();
       img.src = file;
@@ -883,9 +883,11 @@
 
     let isDragging = false;
 
+    // マウス/タッチ操作を開始したときの関数
     function handleDragStart(e) {
       if (!running || isStunned) return;
       isDragging = true;
+      // この行を追加して、デフォルトのブラウザ操作を無効化
       e.preventDefault();
     }
 
@@ -906,12 +908,12 @@
       isDragging = false;
     }
 
-    // Touch events for mobile
-    window.addEventListener('touchstart', handleDragStart);
+    // アライグマの要素にイベントリスナーを設定
+    raccoon.addEventListener('touchstart', handleDragStart);
     window.addEventListener('touchmove', handleDragMove);
     window.addEventListener('touchend', handleDragEnd);
 
-    // Mouse events for PC
+    // PC用のマウスイベントリスナーはそのまま
     window.addEventListener('mousedown', handleDragStart);
     window.addEventListener('mousemove', handleDragMove);
     window.addEventListener('mouseup', handleDragEnd);
